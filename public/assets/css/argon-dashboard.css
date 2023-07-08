@@ -20498,7 +20498,9 @@ label,
 }
 .icon-sm i {
   top: 3px;
-  font-size: 0.65rem;
+  /* font-size: 0.65rem; */
+   /* Tambahan Mario  */
+  font-size: 1rem;
 }
 
 .icon-md {
@@ -24880,4 +24882,184 @@ pre[class*=language-] {
   .ps {
     overflow: auto !important;
   }
+}
+
+/* Tambahan Mario buat sidebar */
+.list-unstyled {
+  padding-left: 0;
+  list-style: none;
+}
+
+.sidebar-item {
+  /* submenu item active */
+  background: inherit;
+}
+
+.sidebar-item li a {
+  /* padding-top: 1rem;
+  padding-bottom: 1rem; */
+  padding-left: 50px;
+  background: whitesmoke;
+}
+
+.sidebar-item.active > .sidebar-link {
+  background: whitesmoke;
+  border-left: 2px solid #db6574;
+  color: var(--bs-gray-dark);
+}
+
+.sidebar-item.active > .sidebar-link:hover {
+  background: blue;
+}
+
+.sidebar-item.active > .sidebar-link .svg-icon {
+  color: darkblue;
+}
+
+.sidebar-item.active ul .sidebar-link {
+  border-left: 2px solid #db6574;
+}
+
+.sidebar-item li.active > a.sidebar-link {
+  background: whitesmoke;
+  color: orange;
+}
+
+.sidebar-item .collapse {
+  background: whitesmoke;
+}
+
+/* Sub Sidebar ketika di hover */
+.sidebar-item .collapse li:not(.active) .sidebar-link:hover {
+  background: var(--bs-color6);
+  color: var(--bs-color3);
+}
+
+/* Sidebar tampilan awal */
+.sidebar-link {
+  color: inherit;
+  position: relative;
+  padding: 0.8rem 1.2rem;
+  text-decoration: none;
+  display: block;
+  border-left: 2px solid transparent;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #5d5e61;
+}
+
+@media (max-width: 1199.98px) {
+  .sidebar-link {
+    padding: 15px 2px;
+    border-left: none;
+    font-size: 0.8rem;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+  }
+}
+
+@media (min-width: 1200px) {
+  .sidebar-link .svg-icon {
+    margin-right: 1rem;
+  }
+  .sidebar-link .svg-icon + span {
+    padding-left: 1rem;
+    border-left: 1px solid #3d4148;
+  }
+}
+
+.sidebar-link:hover {
+  background: var(--bs-color5);
+  color: white;
+}
+
+.sidebar-link:hover .svg-icon {
+  color: white;
+}
+
+.sidebar-link[data-bs-toggle="collapse"]::before {
+  content: "";
+  display: block;
+  width: 20px;
+  height: 20px;
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%);
+  background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' aria-labelledby='title' aria-describedby='desc' role='img' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Ctitle%3EAngle Left%3C/title%3E%3Cdesc%3EA line styled icon from Orion Icon Library.%3C/desc%3E%3Cpath data-name='layer1' fill='none' stroke='%23666' stroke-miterlimit='10' stroke-width='5' d='M39 20.006L25 32l14 12.006' stroke-linejoin='round' stroke-linecap='round'%3E%3C/path%3E%3C/svg%3E");
+  background-position: right center;
+  -webkit-transform-origin: center center;
+  transform-origin: center center;
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
+  position: absolute;
+  top: 50%;
+  right: 20px;
+}
+
+@media (max-width: 1199.98px) {
+  .sidebar-link[data-bs-toggle="collapse"]::before {
+    -webkit-transform: translateX(50%) rotate(90deg);
+    transform: translateX(50%) rotate(90deg);
+    position: absolute;
+    top: auto;
+    right: 50%;
+    bottom: 0;
+    left: auto;
+  }
+}
+
+.sidebar-link[aria-expanded="true"]::before, .sidebar-link[aria-expanded="aria-expanded"]::before {
+  -webkit-transform: translateY(-50%) rotate(-90deg);
+  transform: translateY(-50%) rotate(-90deg);
+}
+
+@media (max-width: 1199.98px) {
+  .sidebar-link[aria-expanded="true"]::before, .sidebar-link[aria-expanded="aria-expanded"]::before {
+    -webkit-transform: translateX(-50%) rotate(90deg);
+    transform: translateX(-50%) rotate(90deg);
+  }
+}
+
+.sidebar-link[aria-expanded="true"]:hover, .sidebar-link[aria-expanded="aria-expanded"]:hover {
+  background: var(--bs-color5);
+}
+
+.sidebar-link .badge {
+  vertical-align: middle;
+}
+
+#sidebar.shrinked .sidebar-item a.sidebar-link {
+  padding: 15px 2px;
+  font-size: 0.8rem;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+#sidebar.shrinked .sidebar-item a.sidebar-link[data-bs-toggle="collapse"]::before {
+  -webkit-transform: translateX(50%) rotate(-90deg);
+  transform: translateX(50%) rotate(-90deg);
+  position: absolute;
+  top: auto;
+  right: 50%;
+  bottom: 0;
+  left: auto;
+}
+
+#sidebar.shrinked .sidebar-item a.sidebar-link[data-bs-toggle="collapse"][aria-expanded="true"]::before, #sidebar.shrinked .sidebar-item a.sidebar-link[data-bs-toggle="collapse"][aria-expanded="aria-expanded"]::before {
+  -webkit-transform: translateX(50%) rotate(90deg);
+  transform: translateX(50%) rotate(90deg);
+}
+
+#sidebar.shrinked .sidebar-item a.sidebar-link svg {
+  margin-right: 0 !important;
+  margin-bottom: 4px;
 }
