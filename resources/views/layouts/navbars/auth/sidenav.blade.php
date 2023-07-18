@@ -5,7 +5,7 @@
             aria-hidden="true" id="iconSidenav"></i>
         <a class="navbar-brand m-0" href="{{ route('home') }}"
             target="_blank">
-            <img src="./img/logos/iotlab.jpg" class="navbar-brand-img h-100 ms-1" alt="main_logo">
+            <img src="{{ asset('/img/logos/iotlab.jpg') }}" class="navbar-brand-img h-100 ms-1" alt="main_logo">
             <span class="ms-1 font-weight-bold">Smart Office</span>
             <small class="font-weight-light">by IoT Lab UNS</small>
         </a>
@@ -23,10 +23,7 @@
                 </a>
             </li>
             <li class="nav-item mt-3 d-flex align-items-center">
-                <div class="ps-4">
-                    {{-- <i class="fab fa-laravel" style="color: #f4645f;"></i> --}}
-                </div>
-                <h6 class="ms-2 text-uppercase text-xs font-weight-bolder opacity-6 mb-0">Account Info</h6>
+                <h6 class="ps-2 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Account Info</h6>
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ Route::currentRouteName() == 'profile' ? 'active' : '' }}" href="{{ route('profile') }}">
@@ -46,33 +43,20 @@
                 </a>
             </li>
             <li class="nav-item mt-3">
-                <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Systems</h6>
+                <h6 class="ps-2 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Energy Managements</h6>
             </li>
             <li class="nav-item">
-                {{-- <a class="nav-link {{ str_contains(request()->url(), 'tables') == true ? 'active' : '' }}" href="{{ route('page', ['page' => 'tables']) }}"> --}}
-                <a class="nav-link {{ str_contains(request()->url(), 'tables') == true ? 'active' : '' }}" href="#energyDropdown">
+                <a class="nav-link {{ str_contains(request()->url(), 'energy') == true ? 'active' : '' }}" href="{{ route('energy', ['jenis' => 'energy-monitor']) }}">
+                {{-- <a class="nav-link {{ str_contains(request()->url(), 'tables') == true ? 'active' : '' }}" href="#energyDropdown"> --}}
                     <div
                         class=" icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
                         <i class="fa-solid fa-plug-circle-bolt" style="color: #20c997;"></i>
                     </div>
                     <span class="nav-link-text ms-1">Energy</span>
                 </a>
-                <ul class="collapse list-unlisted" id="energyDropdown">
-                    <li><a class="sidebar-link" href="#"></a> Monitor </li>
-                    <li><a class="sidebar-link"href="#"></a> Monitor </li>
-                    <li><a class="sidebar-link" href="#"></a> Monitor </li>
-                </ul>
             </li>
-            {{-- <li class="sidebar-item"><a class="sidebar-link" href="#energidropdown" data-bs-toggle="collapse"> 
-                <ul class="collapse list-unstyled " id="energidropdown">
-                    <li><a class="sidebar-link" href="{{url('monitor')}}">Monitor</a></li>
-                    <li><a class="sidebar-link" href="{{url('control')}}">Control</a></li>
-                <!-- <li><a class="sidebar-link" href="{{url('statistic')}}">Statistic</a></li> -->
-                    <li><a class="sidebar-link" href="{{url('cost')}}">Statistic</a></li>
-                </ul>
-            </li> --}}
             <li class="nav-item">
-                <a class="nav-link {{  str_contains(request()->url(), 'billing') == true ? 'active' : '' }}" href="{{ route('page', ['page' => 'billing']) }}">
+                <a class="nav-link {{  Route::currentRouteName() == 'security' ? 'active' : '' }}" href="{{ url('camera') }}">
                     <div
                         class="icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
                         <i class="fa-solid fa-shield-halved" style="color: #1671c0;"></i>
@@ -90,7 +74,10 @@
                 </a>
             </li>
             <li class="nav-item mt-3">
-                <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Config Pages</h6>
+                <h6 class="ps-2 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Room Managements</h6>
+            </li>
+            <li class="nav-item mt-3">
+                <h6 class="ps-2 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Config Pages</h6>
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ Route::currentRouteName() == 'profile-static' ? 'active' : '' }}" href="{{ route('profile-static') }}">
@@ -118,6 +105,10 @@
                     </div>
                     <span class="nav-link-text ms-1">Integrated System</span>
                 </a>
+            </li>
+            <li class="nav-item">
+                <a href="/docs/bootstrap/overview/argon-dashboard/index.html" target="_blank"
+                class="btn btn-dark btn-sm w-100 mb-3">Documentation</a>
             </li>
         </ul>
     </div>

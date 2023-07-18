@@ -9411,7 +9411,7 @@ textarea.form-control-lg {
 }
 
 .text-warning {
-  color: #596CFF !important;
+  color: #fd7e14 !important;
 }
 
 .text-danger {
@@ -9483,7 +9483,7 @@ textarea.form-control-lg {
 }
 
 .bg-warning {
-  background-color: #596CFF !important;
+  background-color: #fd7e14 !important;
 }
 
 .bg-danger {
@@ -19001,7 +19001,7 @@ textarea.form-control-lg {
 }
 
 .alert-warning {
-  background-image: linear-gradient(310deg, #596CFF 0%, #faa118 100%);
+  background-image: linear-gradient(310deg, #fd7e14 0%, #faa118 100%);
 }
 
 .alert-danger {
@@ -19129,7 +19129,7 @@ textarea.form-control-lg {
 }
 
 .badge.bg-warning {
-  background: #596CFF;
+  background: #fd7e14;
 }
 
 .badge.bg-danger {
@@ -19364,19 +19364,19 @@ textarea.form-control-lg {
 
 .btn-warning:hover,
 .btn.bg-gradient-warning:hover {
-  background-color: #596CFF;
-  border-color: #596CFF;
+  background-color: #fd7e14;
+  border-color: #fd7e14;
 }
 .btn-warning .btn.bg-outline-warning,
 .btn.bg-gradient-warning .btn.bg-outline-warning {
-  border: 1px solid #596CFF;
+  border: 1px solid #fd7e14;
 }
 .btn-warning:not(:disabled):not(.disabled).active, .btn-warning:not(:disabled):not(.disabled):active, .show > .btn-warning.dropdown-toggle,
 .btn.bg-gradient-warning:not(:disabled):not(.disabled).active,
 .btn.bg-gradient-warning:not(:disabled):not(.disabled):active,
 .show > .btn.bg-gradient-warning.dropdown-toggle {
-  color: color-yiq(#596CFF);
-  background-color: #596CFF;
+  color: color-yiq(#fd7e14);
+  background-color: #fd7e14;
 }
 .btn-warning.focus, .btn-warning:focus,
 .btn.bg-gradient-warning.focus,
@@ -19391,7 +19391,7 @@ textarea.form-control-lg {
   background-color: transparent;
   opacity: 0.75;
   box-shadow: none;
-  color: #596CFF;
+  color: #fd7e14;
 }
 
 .btn-danger:hover,
@@ -19733,7 +19733,7 @@ textarea.form-control-lg {
   background: rgba(0, 0, 0, 0.2);
 }
 .card.card-background.card-background-mask-warning:after {
-  background-image: linear-gradient(310deg, #596CFF 0%, #fbb140 100%);
+  background-image: linear-gradient(310deg, #fd7e14 0%, #fbb140 100%);
   opacity: 0.85;
 }
 .card.card-background.card-background-mask-danger:before {
@@ -20374,15 +20374,15 @@ label,
 }
 
 .bg-gradient-warning {
-  background-image: linear-gradient(310deg, #596CFF 0%, #fbb140 100%);
+  background-image: linear-gradient(310deg, #fff 0%, #fbb140 100%);
 }
 
 .bg-gradient-danger {
-  background-image: linear-gradient(310deg, #f5365c 0%, #f56036 100%);
+  background-image: linear-gradient(310deg, #f5365c 0%,#FBD38D  100%);
 }
 
 .bg-gradient-light {
-  background-image: linear-gradient(310deg, #CED4DA 0%, #EBEFF4 100%);
+  background-image: linear-gradient(310deg, #CED4DA 0%, #EBEFF4 70%);
 }
 
 .bg-gradient-dark {
@@ -20442,7 +20442,7 @@ label,
 }
 
 .bg-gradient-faded-warning-vertical {
-  background-image: radial-gradient(200px circle at 50% 70%, rgba(251, 99, 64, 0.3) 0, #596CFF 100%);
+  background-image: radial-gradient(200px circle at 50% 70%, rgba(251, 99, 64, 0.3) 0, #fd7e14 100%);
 }
 
 .bg-gradient-faded-danger-vertical {
@@ -20588,7 +20588,7 @@ svg.text-info .color-background {
 }
 
 svg.text-warning .color-foreground {
-  fill: #596CFF;
+  fill: #fd7e14;
 }
 svg.text-warning .color-background {
   fill: #fbb140;
@@ -22192,8 +22192,8 @@ hr.horizontal.gray-light {
   color: #fff;
 }
 .nav.nav-pills.nav-pills-warning .moving-tab .nav-link.active {
-  background: #596CFF;
-  color: #596CFF;
+  background: #fd7e14;
+  color: #fd7e14;
 }
 .nav.nav-pills.nav-pills-danger {
   background: #fff;
@@ -22278,7 +22278,7 @@ hr.horizontal.gray-light {
   border: none;
 }
 .pagination.pagination-warning .page-item.active > .page-link, .pagination.pagination-warning .page-item.active > .page-link:focus, .pagination.pagination-warning .page-item.active > .page-link:hover {
-  background-image: linear-gradient(310deg, #596CFF 0%, #fbb140 100%);
+  background-image: linear-gradient(310deg, #fd7e14 0%, #fbb140 100%);
   border: none;
 }
 .pagination.pagination-danger .page-item.active > .page-link, .pagination.pagination-danger .page-item.active > .page-link:focus, .pagination.pagination-danger .page-item.active > .page-link:hover {
@@ -23116,14 +23116,14 @@ p {
 }
 
 .text-gradient {
-  background-clip: text;
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   position: relative;
   z-index: 1;
 }
 .text-gradient.text-primary {
-  background-image: linear-gradient(310deg, #596CFF, #f56036);
+  background-image: linear-gradient(310deg, #596CFF, #63B3ED);
 }
 .text-gradient.text-info {
   background-image: linear-gradient(310deg, #1171ef, #11cdef);
