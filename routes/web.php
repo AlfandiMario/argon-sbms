@@ -17,15 +17,17 @@ Route::get('/', function () {
 	return view('welcome');
 });
 
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\PageController;
-use App\Http\Controllers\RegisterController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\ResetPassword;
 use App\Http\Controllers\ChangePassword;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\EnergyController;
+use App\Http\Controllers\LightsController;
+use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SecurityController;
+use App\Http\Controllers\EnvironmentController;
+use App\Http\Controllers\UserProfileController;
 
 Route::get('/', function () {
 	return redirect('/dashboard');
@@ -52,7 +54,14 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('/pages/{page}', [PageController::class, 'index'])->name('page');
 	Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
-	Route::get('/energy/{jenis}', [EnergyController::class, 'index'])->name('energy');
-	Route::get('/camera', [SecurityController::class, 'index'])->name('security');
-	Route::get('/doorlock', [SecurityController::class, 'doorlock'])->name('security');
+	Route::get('/energy-monitor', [EnergyController::class, 'monitor'])->name('energy-monitor');
+	Route::get('/energy-control', [EnergyController::class, 'showControl'])->name('energy-control');
+	Route::get('/energy-stats', [EnergyController::class, 'stats'])->name('energy-stats');
+	Route::get('/standar-ike', [EnergyController::class, 'standarIke'])->name('standar-ike');
+
+	Route::get('/security-camera', [SecurityController::class, 'index'])->name('security-camera');
+	Route::get('/security-doorlock', [SecurityController::class, 'doorlock'])->name('security-doorlock');
+
+	Route::get('/envi-sense', [EnvironmentController::class, 'monitor'])->name('envi-sense');
+	Route::get('/envi-lights', [LightsController::class, 'showControl'])->name('envi-lights');
 });

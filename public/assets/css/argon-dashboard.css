@@ -21159,7 +21159,7 @@ hr.horizontal.gray-light {
 .navbar-vertical.navbar-expand-xs .navbar-collapse {
   display: block;
   overflow: auto;
-  height: calc(100vh - 360px);
+  height: calc(100vh - 180px); // Agar sidebar bisa full, tidak terpotong block bawahnya
 }
 .navbar-vertical.navbar-expand-xs > [class*=container] {
   flex-direction: column;
@@ -21240,7 +21240,7 @@ hr.horizontal.gray-light {
   .navbar-vertical.navbar-expand-sm .navbar-collapse {
     display: block;
     overflow: auto;
-    height: calc(100vh - 360px);
+    height: calc(100vh - 180px);
   }
   .navbar-vertical.navbar-expand-sm > [class*=container] {
     flex-direction: column;
@@ -21336,7 +21336,7 @@ hr.horizontal.gray-light {
   .navbar-vertical.navbar-expand-md .navbar-collapse {
     display: block;
     overflow: auto;
-    height: calc(100vh - 360px);
+    height: calc(100vh - 180px);
   }
   .navbar-vertical.navbar-expand-md > [class*=container] {
     flex-direction: column;
@@ -21432,7 +21432,7 @@ hr.horizontal.gray-light {
   .navbar-vertical.navbar-expand-lg .navbar-collapse {
     display: block;
     overflow: auto;
-    height: calc(100vh - 360px);
+    height: calc(100vh - 180px);
   }
   .navbar-vertical.navbar-expand-lg > [class*=container] {
     flex-direction: column;
@@ -21528,7 +21528,7 @@ hr.horizontal.gray-light {
   .navbar-vertical.navbar-expand-xl .navbar-collapse {
     display: block;
     overflow: auto;
-    height: calc(100vh - 360px);
+    height: calc(100vh - 180px);
   }
   .navbar-vertical.navbar-expand-xl > [class*=container] {
     flex-direction: column;
@@ -21624,7 +21624,7 @@ hr.horizontal.gray-light {
   .navbar-vertical.navbar-expand-xxl .navbar-collapse {
     display: block;
     overflow: auto;
-    height: calc(100vh - 360px);
+    height: calc(100vh - 180px);
   }
   .navbar-vertical.navbar-expand-xxl > [class*=container] {
     flex-direction: column;
