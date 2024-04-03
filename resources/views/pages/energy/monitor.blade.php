@@ -15,84 +15,87 @@
                     <!-- Section Real Time -->
                     <div class="d-flex justify-content-center">
                         @php
-                        for ($i=0; $i< 6; $i++) : @endphp <div class="col mx-2 p-2 border border-shadow"
+                        $i=0;
+                        foreach ($keys as $key) : @endphp <div class="col mx-2 p-2 border border-shadow"
                             style="border-radius: 1rem; background-color:white">
                             <div class="numbers text-center">
                                 <p class="text-sm mb-2 text-uppercase font-weight-bold">
                                     @php echo $collection[$i]; @endphp
                                 </p>
                                 <h6 class="font-weight-bolder text-warning">
-                                    @php echo $value[$i]; @endphp
-                                </h6>
-                            </div>
-                    </div>
-                    @php
-                    endfor
-                    @endphp
-                </div>
-            </div>
-
-            <div class="row-12">
-                <div class="card-header my-0 py-0">
-                    <h6>Energy Usage</h6>
-                </div>
-                <div class="card-body pt-0">
-                    <div class="d-flex justify-content-center">
-                        @php
-
-                        $i = 0;
-                        foreach ($collection2 as $item):
-                        @endphp
-                        <div class="col mx-2 p-2 border border-shadow"
-                            style="border-radius: 1rem; background-color:white">
-                            <div class="numbers text-center">
-                                <p class="text-sm mb-2 text-uppercase font-weight-bold">
-                                    @php echo $item; @endphp
-                                </p>
-                                <h6 class="font-weight-bolder text-warning">
-                                    @php echo $value2[$i]; @endphp
+                                    @php echo number_format($energies->$key,2,',','.') ; @endphp
                                 </h6>
                             </div>
                         </div>
                         @php
                         $i++;
-                        endforeach @endphp
+                        endforeach
+                        @endphp
                     </div>
                 </div>
-            </div>
 
-            {{-- Section Graph --}}
-            <div class="row mt-4">
-                <div class="col-lg-12 mb-lg-0 mb-4">
-                    <div class="card z-index-2 h-100">
-                        <div class="card-header pb-0 pt-3 bg-transparent">
-                            <h6 class="text-capitalize">Power Consumption (Day-to-day)</h6>
-                            <p class="text-sm mb-0">
-                                <i class="fa fa-arrow-up text-success"></i>
-                                <span class="font-weight-bold ">4% more</span> than previous month
-                            </p>
+                <div class="row-12">
+                    <div class="card-header my-0 py-0">
+                        <h6>Energy Usage</h6>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="d-flex justify-content-center">
+                            @php
+                            $i = 0;
+                            foreach ($collection2 as $item):
+                            @endphp
+                            <div class="col mx-2 p-2 border border-shadow"
+                                style="border-radius: 1rem; background-color:white">
+                                <div class="numbers text-center">
+                                    <p class="text-sm mb-2 text-uppercase font-weight-bold">
+                                        @php echo $item; @endphp
+                                    </p>
+                                    <h6 class="font-weight-bolder text-warning">
+                                        @php echo
+                                        number_format($values2[$i],2,',','.'); @endphp
+                                    </h6>
+                                </div>
+                            </div>
+                            @php
+                            $i++;
+                            endforeach @endphp
                         </div>
-                        <div class="card-body p-3">
-                            <div class="chart">
-                                <canvas id="chart-line" class="chart-canvas" height="300"></canvas>
+                    </div>
+                </div>
+
+                {{-- Section Graph --}}
+                <div class="row mt-4">
+                    <div class="col-lg-12 mb-lg-0 mb-4">
+                        <div class="card z-index-2 h-100">
+                            <div class="card-header pb-0 pt-3 bg-transparent">
+                                <h6 class="text-capitalize">Power Consumption (Day-to-day)</h6>
+                                <p class="text-sm mb-0">
+                                    <i class="fa fa-arrow-up text-success"></i>
+                                    <span class="font-weight-bold ">4% more</span> than previous month
+                                </p>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="chart">
+                                    <canvas id="chart-line" class="chart-canvas" height="300"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row mt-4">
-                <div class="col-lg-12 mb-lg-0 mb-4">
-                    <div class="card z-index-2 h-100">
-                        <div class="card-header pb-0 pt-3 bg-transparent">
-                            <h6 class="text-capitalize">Energy Consumption (Day-to-day)</h6>
-                            <p class="text-sm mb-0">
-                                <i class="fa fa-arrow-up text-success"></i>
-                                <span class="font-weight-bold ">4% more</span> than previous month
-                            </p>
-                        </div>
-                        <div class="card-body p-3">
-                            <div class="chart">
-                                <canvas id="chart-line-2" class="chart-canvas" height="300"></canvas>
+                <div class="row mt-4">
+                    <div class="col-lg-12 mb-lg-0 mb-4">
+                        <div class="card z-index-2 h-100">
+                            <div class="card-header pb-0 pt-3 bg-transparent">
+                                <h6 class="text-capitalize">Energy Consumption (Day-to-day)</h6>
+                                <p class="text-sm mb-0">
+                                    <i class="fa fa-arrow-up text-success"></i>
+                                    <span class="font-weight-bold ">4% more</span> than previous month
+                                </p>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="chart">
+                                    <canvas id="chart-line-2" class="chart-canvas" height="300"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -100,9 +103,8 @@
             </div>
         </div>
     </div>
-</div>
 
-@include('layouts.footers.auth.footer')
+    @include('layouts.footers.auth.footer')
 </div>
 @endsection
 @push('js')

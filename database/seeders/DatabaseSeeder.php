@@ -20,7 +20,21 @@ class DatabaseSeeder extends Seeder
             'firstname' => 'Admin',
             'lastname' => 'Admin',
             'email' => 'admin@argon.com',
-            'password' => bcrypt('secret')
+            'password' => bcrypt('secret'),
+            'level' => 'admin'
+        ]);
+        DB::table('users')->insert([
+            'username' => 'mario',
+            'firstname' => 'Mario',
+            'lastname' => 'Alfandi',
+            'email' => 'mario@argon.com',
+            'password' => bcrypt('secret'),
+            'level' => 'user'
+        ]);
+        DB::table('energy_costs')->insert([
+            'harga' => '1440',
+            'pokok' => '1440',
+            'delay' => '300',
         ]);
     }
 }

@@ -2,25 +2,46 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Energy;
+use App\Models\EnergyKwh;
+use App\Models\EnergyCost;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class EnergyController extends Controller
 {
-    // public function index()
-    // {
-    //     return view('pages.energy.energy-monitor');
-    // }
-
     public function monitor()
     {
         $title = 'Energy Monitoring';
-        $collection = ["Voltage", "Ampere", "Frequency", "Power", "Reactive Power", "Apparent Power"];
-        $value = ["220 V", "1 A", "60 Hz", "300 W", "300 W", "300 W", "60 Hz"];
+        $today = Carbon::today()->toDateString();
+        $yesterday = Carbon::now()->subDay()->toDateString();
+        $thisMonth = Carbon::now()->month; // return int
+        $lastMonth = Carbon::now()->month - 1;
+        $twoMonthAgo = Carbon::now()->month - 2;
 
-        $collection2 = ["Yesterday", "This Month", "Tariff", "This Month Cost", "Last Month Cost"];
-        $value2 = ["4 kWh", "15 kWh", "1440 IDR", "120k", "300k"];
+        $energies = Energy::where('id_kwh', '1')->latest()->first();
+        $lastKwh = EnergyKwh::whereDate('created_at', $today)->orderByDesc('updated_at')->first()->total_energy / 1000;
+        $yesterdayKwh = EnergyKwh::whereDate('created_at', $yesterday)->orderByDesc('updated_at')->first()->total_energy / 1000;
+        $todayEnergy = $lastKwh - $yesterdayKwh;
 
-        return view("pages.energy.monitor", compact('title', 'collection', 'value', 'collection2', 'value2'));
+        $twoMonthAgoKwh = EnergyKwh::whereMonth('created_at', $twoMonthAgo)->orderByDesc('updated_at')->first()->total_energy / 1000;
+        $prevMonthKwh = EnergyKwh::whereMonth('created_at', $lastMonth)->orderByDesc('updated_at')->first()->total_energy / 1000 - $twoMonthAgoKwh;
+        $thisMonthKwh = EnergyKwh::whereMonth('created_at', $thisMonth)->orderByDesc('updated_at')->first()->total_energy / 1000 - $prevMonthKwh;
+
+        // dd($thisMonthKwh);
+
+        $tarif = EnergyCost::latest()->pluck('harga')->first();
+        $lastMonthCost = $prevMonthKwh  * $tarif;
+        $thisMonthCost = $thisMonthKwh  * $tarif;
+
+
+        $collection = ["Freq (Hz)", "Ampere (A)", "Voltage (V)", "Power (kWh)", "Reactive P (kVAR)", "Apparent P (kVA)"];
+        $keys = ['frekuensi', 'arus', 'tegangan', 'active_power', 'reactive_power', 'apparent_power'];
+        $collection2 = ["Today (kWh)", "This Month (kWh)", "Tariff (Rp)", "This Month Cost (Rp)", "Last Month Cost (Rp)"];
+        $values2 = [$todayEnergy, $thisMonthKwh, $tarif, $thisMonthCost, $lastMonthCost];
+
+        return view("pages.energy.monitor", compact('title', 'collection', 'keys', 'collection2', 'energies', 'values2'));
     }
 
     public function showControl()
