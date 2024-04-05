@@ -13,7 +13,7 @@
                         <div class="col-lg-12 mb-lg-0 mb-4">
                             <div class="card z-index-2 h-100">
                                 <div class="card-header pb-0 pt-3 bg-transparent">
-                                    <h6 class="text-capitalize">Voltage (every 5 minutes)</h6>
+                                    <h6 class="text-capitalize">Energy Consumption (Daily)</h6>
                                     <p class="text-sm mb-0">
                                         <i class="fa fa-arrow-up text-success"></i>
                                         <span class="font-weight-bold ">4% more</span> than previous month
@@ -31,7 +31,7 @@
                         <div class="col-lg-12 mb-lg-0 mb-4">
                             <div class="card z-index-2 h-100">
                                 <div class="card-header pb-0 pt-3 bg-transparent">
-                                    <h6 class="text-capitalize">Ampere (Every 5 Minutes)</h6>
+                                    <h6 class="text-capitalize">Energy Consumption (Monthly)</h6>
                                     <p class="text-sm mb-0">
                                         <i class="fa fa-arrow-up text-success"></i>
                                         <span class="font-weight-bold ">4% more</span> than previous month
@@ -49,7 +49,7 @@
                         <div class="col-lg-12 mb-lg-0 mb-4">
                             <div class="card z-index-2 h-100">
                                 <div class="card-header pb-0 pt-3 bg-transparent">
-                                    <h6 class="text-capitalize">Power (Every 5 Minutes)</h6>
+                                    <h6 class="text-capitalize">Energy Consumption (Annualy)</h6>
                                     <p class="text-sm mb-0">
                                         <i class="fa fa-arrow-up text-success"></i>
                                         <span class="font-weight-bold ">4% more</span> than previous month
@@ -71,7 +71,12 @@
 @endsection
 @push('js')
 <script src="{{ asset('assets/js/plugins/chartjs.min.js') }}"></script>
+
+
 <script>
+    var dates = JSON.parse('{!! json_encode($dates) !!}');
+    var energies = JSON.parse('{!! json_encode($dailyEnergy) !!}');
+
     var ctx1 = document.getElementById("chart-line").getContext("2d");
 
     var gradientStroke1 = ctx1.createLinearGradient(0, 230, 0, 50);
@@ -82,19 +87,18 @@
     new Chart(ctx1, {
         type: "line",
         data: {
-            labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+            labels: dates,
             datasets: [{
                 label: "Energy (kWh)",
-                tension: 0.4,
+                tension: 0.2,
                 borderWidth: 0,
-                pointRadius: 0,
-                borderColor: "#596CFF",
+                pointRadius: 2,
+                borderColor: "#63B3ED",
                 backgroundColor: gradientStroke1,
                 borderWidth: 3,
                 fill: true,
-                data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
+                data: energies,
                 maxBarThickness: 6
-
             }],
         },
         options: {
@@ -116,12 +120,29 @@
                         display: true,
                         drawOnChartArea: true,
                         drawTicks: false,
-                        borderDash: [5, 5]
+                        borderDash: [5, 5],
+                        color: function (ike) {
+                            if (ike.tick.value <= 7920) {
+                                return '#00ff00'
+                            } else if (7920 < ike.tick.value < 12080) {
+                                return '#009900'
+                            } else if (12080 < ike.tick.value < 14580) {
+                                return '#ffff00'
+                            } else if (14580 < ike.tick.value < 19170) {
+                                return '#ff9900'
+                            } else if (19170 < ike.tick.value < 23750) {
+                                return '#ff3300'
+                            }
+                            else {
+                                return '#800000'
+                            }
+
+                        }
                     },
                     ticks: {
                         display: true,
                         padding: 10,
-                        color: '#fbfbfb',
+                        color: '#aaa',
                         font: {
                             size: 11,
                             family: "Open Sans",
@@ -132,15 +153,15 @@
                 },
                 x: {
                     grid: {
-                        drawBorder: false,
-                        display: false,
-                        drawOnChartArea: false,
+                        drawBorder: true,
+                        display: true,
+                        drawOnChartArea: true,
                         drawTicks: false,
                         borderDash: [5, 5]
                     },
                     ticks: {
                         display: true,
-                        color: '#ccc',
+                        color: '#aaa',
                         padding: 20,
                         font: {
                             size: 11,
