@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 
 // Energy Stuff
 Route::get('ApiEnergy', [EnergyController::class, 'getAllEnergies']);
+Route::post('ApiEnergy', [EnergyController::class, 'addEnergiesData']);
 Route::get('ApiEnergy/{id}', [EnergyController::class, 'getEnergies']);
 Route::get('debug-func', [EnergyController::class, 'debugFunc']);
 Route::get('total-energy', [EnergyController::class, 'getTotalEnergy']);
@@ -24,6 +25,7 @@ Route::post('total-energy', [EnergyController::class, 'addTotalEnergy']);
 Route::get('daily-energy', [EnergyController::class, 'getDailyEnergy']);
 Route::get('daily-energy-reversed', [EnergyController::class, 'getDailyEnergyReversed']);
 Route::get('monthly-energy', [EnergyController::class, 'getMonthlyEnergy']);
+Route::get('annual-energy', [EnergyController::class, 'getAnnualEnergy']);
 Route::get('ike-dummy', [EnergyController::class, 'getIkeDummy']);
 Route::get('ike-dummy-annual', [EnergyController::class, 'getIkeDummyAnnual']);
 Route::post('receive-forecast', [EnergyController::class, 'receiveForecast']);

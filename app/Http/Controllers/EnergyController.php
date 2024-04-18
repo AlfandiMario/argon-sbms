@@ -67,15 +67,69 @@ class EnergyController extends Controller
             array_push($dates, $date);
         }
 
-        return view("pages.energy.stats", compact('title', 'dates', 'dailyEnergy'));
+        $col = $this->getMonthlyEnergy();
+        $monthlyEnergy = [];
+        $month = [];
+        $ike = [];
+        $color = [];
+        foreach ($col as $item) {
+            array_push($monthlyEnergy, $item->monthly_kwh);
+            $f_month = Carbon::parse($item->latest_updated)->format('M');
+            array_push($month, $f_month);
+            array_push($ike, $item->ike);
+            array_push($color, $item->color);
+        }
+
+
+        return view("pages.energy.stats", compact('title', 'dates', 'dailyEnergy', 'monthlyEnergy', 'month', 'ike', 'color'));
     }
 
     public function standarIke()
     {
-        $collection = ["Yesterday", "This Month", "Tariff", "This Month Cost", "Last Month Cost"];
-        $value = ["4 kWh", "15 kWh", "1440 IDR", "120k", "300k"];
+        $title = 'IKE Standard';
+        $today = Carbon::today()->toDateString();
+        $yesterday = Carbon::now()->subDay()->toDateString();
+        $thisMonth = Carbon::now()->month; // return int
+        $lastMonth = Carbon::now()->month - 1;
+        $twoMonthAgo = Carbon::now()->month - 2;
 
-        return view("pages.ike.index", compact('collection', 'value'));
+        $twoMonthAgoKwh = EnergyKwh::whereMonth('created_at', $twoMonthAgo)->orderByDesc('updated_at')->first()->total_energy / 1000;
+        $prevMonthKwh = EnergyKwh::whereMonth('created_at', $lastMonth)->orderByDesc('updated_at')->first()->total_energy / 1000 - $twoMonthAgoKwh;
+        $thisMonthKwh = EnergyKwh::whereMonth('created_at', $thisMonth)->orderByDesc('updated_at')->first()->total_energy / 1000 - $prevMonthKwh;
+
+        $tarif = EnergyCost::latest()->pluck('harga')->first();
+        $lastMonthCost = $prevMonthKwh  * $tarif;
+        $thisMonthCost = $thisMonthKwh  * $tarif;
+
+        $collection = ["Last Month (kWh)", "This Month(kWh)", "This Month Cost (IDR)", "Last Month Cost (IDR)"];
+        $values = [$prevMonthKwh, $thisMonthKwh, $thisMonthCost, $lastMonthCost];
+
+        $col = $this->getMonthlyEnergy();
+        $monthlyEnergy = [];
+        $month = [];
+        $ike = [];
+        $color = [];
+        foreach ($col as $item) {
+            array_push($monthlyEnergy, $item->monthly_kwh);
+            $f_month = Carbon::parse($item->latest_updated)->format('M');
+            array_push($month, $f_month);
+            array_push($ike, $item->ike);
+            array_push($color, $item->color);
+        }
+
+        $col = $this->getAnnualEnergy();
+        $annualEnergy = [];
+        $year = [];
+        $ike_y = [];
+        $color_y = [];
+        foreach ($col as $item) {
+            array_push($annualEnergy, $item->annual_kwh);
+            array_push($year, $item->tahun);
+            array_push($ike_y, $item->ike);
+            array_push($color_y, $item->color);
+        }
+
+        return view("pages.ike.index", compact('title', 'collection', 'values', 'monthlyEnergy', 'month', 'ike', 'color', 'annualEnergy', 'year', 'ike_y', 'color_y'));
     }
 
     public function getAllEnergies()
@@ -90,6 +144,60 @@ class EnergyController extends Controller
         // Hide the created_at and updated_at fields
         $formattedData->makeHidden(['created_at', 'updated_at']);
         return response($formattedData, 200);
+    }
+
+    public function addEnergiesData(Request $request)
+    {
+        // Validasi agar data tersimpan setiap 5 menit sekali saja
+        // Jaga-jaga kalau end-node error dan ngirim beberapa kali
+
+        $latestData = Energy::where('id_kwh', $request->id_kwh)
+            ->latest('created_at')
+            ->first();
+        if ($latestData) {
+            $fiveMinutesAgo = Carbon::now()->subMinutes(4);
+            if ($latestData->created_at < $fiveMinutesAgo) {
+                // Save the new data
+                $data = new Energy;
+                $data->id_kwh = $request->id_kwh;
+                $data->frekuensi = $request->frekuensi;
+                $data->arus = $request->arus;
+                $data->tegangan = $request->tegangan;
+                $data->active_power = $request->active_power;
+                $data->reactive_power = $request->reactive_power;
+                $data->apparent_power = $request->apparent_power;
+                $data->save();
+
+                return response()->json([
+                    "message" => "Data record added"
+                ], 201);
+            } else {
+                return response()->json([
+                    "message" => "Sorry, belum 5 menit"
+                ], 400);
+            }
+        } else {
+            // Save the new data if no previous data exists
+            $data = new Energy;
+            $data->id_kwh = $request->id_kwh;
+            $data->frekuensi = $request->frekuensi;
+            $data->arus = $request->arus;
+            $data->tegangan = $request->tegangan;
+            $data->active_power = $request->active_power;
+            $data->reactive_power = $request->reactive_power;
+            $data->apparent_power = $request->apparent_power;
+            $data->save();
+
+            return response()->json([
+                "message" => "Data record added"
+            ], 201);
+        }
+        // post data
+
+
+        return response()->json([
+            "message" => "data record added"
+        ], 201);
     }
 
     public function getEnergies($id)
@@ -258,19 +366,18 @@ class EnergyController extends Controller
         $data = EnergyKwh::selectRaw('MONTH(created_at) as month, YEAR(created_at) as tahun, MAX(created_at) as latest_updated, MAX(total_energy) as total_energy')
             ->where('id_kwh', '=', '1')
             ->groupBy('month', 'tahun')
-            ->latest('latest_updated')
+            ->oldest('latest_updated')
             ->get();
-
         $price = EnergyCost::latest()->first()->pokok;
 
         $length = count($data);
         // $data[$length-1]->monthly_kwh = ($data[$length-1]->energy_meter - 6950)/1000; // pertama kali pasang di 30 des dengan kwh meter start dari 6950
 
-        for ($i = 0; $i < $length - 1; $i++) {
-            $data[$i]->monthly_kwh = ($data[$i]->energy_meter - $data[$i + 1]->energy_meter) / 1000; // energy perbulan dalam kWh
+        for ($i = 1; $i < $length; $i++) {
+            $data[$i]->monthly_kwh = ($data[$i]->total_energy - $data[$i - 1]->total_energy) / 1000; // energy perbulan dalam kWh
             $data[$i]->bill = intval($data[$i]->monthly_kwh * $price); // biaya listrik perbulan
             $angka_ike = $data[$i]->monthly_kwh / 33.1;
-            $data[$i]->angka_ike = $angka_ike;
+            $data[$i]->angka_ike = round($angka_ike, 2);
             switch ($angka_ike) {
                 case $angka_ike <= 7.92:
                     $ike = 'Sangat Efisien';
@@ -302,9 +409,68 @@ class EnergyController extends Controller
         }
 
         // Remove the last item from the collection since there is no next day for the last day
-        $data->pop();
+        $data->shift();
 
         $data->makeHidden(['energy_meter']);
+
+        return $data;
+    }
+
+    public function getAnnualEnergy()
+    {
+        $data = EnergyKwh::selectRaw('YEAR(created_at) as tahun, MAX(created_at) as latest_updated')
+            ->where('id_kwh', '=', '1')
+            ->groupBy('id_kwh', 'tahun')
+            ->oldest('latest_updated')
+            ->get();
+
+
+        foreach ($data as $item) {
+            $energy = EnergyKwh::select('total_energy', 'created_at')
+                ->where('id_kwh', 1)
+                ->where('created_at', $item->latest_updated)
+                ->latest('created_at')
+                ->first();
+
+            $item->energy_meter = $energy->total_energy / 1000;
+            $item->timestamp = strtotime($energy->created_at) * 1000;
+        }
+
+        $length = count($data);
+        for ($i = 1; $i < $length; $i++) {
+            $data[$i]->annual_kwh = $data[$i]->energy_meter - $data[$i - 1]->energy_meter;
+            $angka_ike = $data[$i]->annual_kwh / 33.1;
+            $data[$i]->angka_ike = $angka_ike;
+            switch ($angka_ike) {
+                case $angka_ike <= 95:
+                    $ike = 'Sangat Efisien';
+                    $color = '#00ff00';
+                    break;
+                case $angka_ike > 95 && $angka_ike <= 145:
+                    $ike = 'Efisien';
+                    $color = '#009900';
+                    break;
+                case $angka_ike > 145 && $angka_ike <= 175:
+                    $ike = 'Cukup Efisien';
+                    $color = '#ffff00';
+                    break;
+                case $angka_ike > 175 && $angka_ike <= 285:
+                    $ike = 'Agak Boros';
+                    $color = '#ff9900';
+                    break;
+                case $angka_ike > 285 && $angka_ike <= 450:
+                    $ike = 'Boros';
+                    $color = '#ff3300';
+                    break;
+                default:
+                    $ike = 'Sangat Boros';
+                    $color = '#800000';
+                    break;
+            }
+            $data[$i]->ike = $ike;
+            $data[$i]->color = $color;
+        }
+        $data->shift();
 
         return $data;
     }
