@@ -58,30 +58,39 @@ class EnergyController extends Controller
     public function stats()
     {
         $title = 'Energy Statistic';
-        $collection = $this->getDailyEnergyReversed();
-        $dailyEnergy = [];
-        $dates = [];
-        foreach ($collection as $item) {
-            array_push($dailyEnergy, $item->today_energy);
+
+        $daily = $this->getDailyEnergyReversed();
+        $daily->makeHidden(['latest_updated', 'energy_meter']);
+        foreach ($daily as $item) {
             $date = Carbon::parse($item->date)->format('M j');
-            array_push($dates, $date);
+            $item->x = $date;
+            $item->y = $item->today_energy;
         }
+        $daily->makeHidden(['date', 'today_energy', 'timestamp']);
 
-        $col = $this->getMonthlyEnergy();
-        $monthlyEnergy = [];
-        $month = [];
-        $ike = [];
-        $color = [];
-        foreach ($col as $item) {
-            array_push($monthlyEnergy, $item->monthly_kwh);
-            $f_month = Carbon::parse($item->latest_updated)->format('M');
-            array_push($month, $f_month);
-            array_push($ike, $item->ike);
-            array_push($color, $item->color);
+        // return $daily;
+
+        $predicts = $this->getWeeklyPrediction();
+        $predicts->makeHidden(['id', 'created_at', 'updated_at']);
+        foreach ($predicts as $item) {
+            $date = Carbon::parse($item->date)->format('M j');
+            $item->x = $date;
+            $item->y = $item->prediction;
         }
+        $predicts->makeHidden(['date', 'prediction']);
 
+        // return $predicts;
 
-        return view("pages.energy.stats", compact('title', 'dates', 'dailyEnergy', 'monthlyEnergy', 'month', 'ike', 'color'));
+        $today = Carbon::today()->toDateString();
+        $yesterday = Carbon::now()->subDay()->toDateString();
+        $lastKwh = EnergyKwh::whereDate('created_at', $today)->orderByDesc('updated_at')->first()->total_energy / 1000;
+        $yesterdayKwh = EnergyKwh::whereDate('created_at', $yesterday)->orderByDesc('updated_at')->first()->total_energy / 1000;
+        $todayKwh = $lastKwh - $yesterdayKwh;
+
+        $energyDiff = number_format((abs($todayKwh - $yesterdayKwh) / $yesterdayKwh) * 100, 2);
+        $energyDiffStatus = ($todayKwh > $yesterdayKwh) ? 'naik' : 'turun';
+
+        return view("pages.energy.stats", compact('title', 'predicts', 'daily', 'energyDiff', 'energyDiffStatus'));
     }
 
     public function standarIke()
@@ -614,6 +623,7 @@ class EnergyController extends Controller
 
         // Sort ulang agar id kecil berada di atas
         $n = count($data);
+
         for ($i = 0; $i < $n - 1; $i++) {
             $minIndex = $i;
             for ($j = $i + 1; $j < $n; $j++) {
@@ -627,6 +637,7 @@ class EnergyController extends Controller
                 $data[$minIndex] = $temp;
             }
         }
+
         return $data;
     }
 }

@@ -9,20 +9,37 @@
                 @include('pages.energy.nav')
                 <div class="card-body pt-0">
                     {{-- Section Graph --}}
-                    <div class="row mt-4">
+                    <div class="row">
                         <div class="col-lg-12 mb-lg-0 mb-4">
                             <div class="card z-index-2 h-100">
                                 <div class="card-header pb-0 pt-3 bg-transparent">
                                     <h6 class="text-capitalize">Energy Consumption (Daily)</h6>
                                     <p class="text-sm mb-0">
+                                        @if($energyDiffStatus == 'naik')
                                         <i class="fa fa-arrow-up text-success"></i>
-                                        <span class="font-weight-bold ">4% more</span> than previous month
+                                        <span class="font-weight-bold">{{ $energyDiff }}% more</span> than the previous day
+                                        @else
+                                        <i class="fa fa-arrow-down text-danger"></i>
+                                        <span class="font-weight-bold">{{ $energyDiff }}% less</span> than the previous day
+                                        @endif
+
                                     </p>
                                 </div>
                                 <div class="card-body p-3">
                                     <div class="chart">
-                                        <canvas id="chart-line" class="chart-canvas" height="300"></canvas>
+                                        <canvas id="chart-daily" class="chart-canvas" height="300"></canvas>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-lg-12 mb-lg-0 mb-4">
+                            <div class="card z-index-2 h-100">
+                                <div class="card-header pb-0 pt-3 bg-transparent">
+                                    <h6 class="text-capitalize">Electricity Bill</h6>
+                                </div>
+                                <div class="card-body p-3">
                                 </div>
                             </div>
                         </div>
@@ -37,106 +54,73 @@
 <script src="{{ asset('assets/js/plugins/chartjs.min.js') }}"></script>
 
 
+
 <script>
-    var dates = JSON.parse('{!! json_encode($dates) !!}');
-    var energies = JSON.parse('{!! json_encode($dailyEnergy) !!}');
+    var predicts = JSON.parse('{!! json_encode($predicts) !!}');
+    var daily = JSON.parse('{!! json_encode($daily) !!}');
+    // console.log(predicts);
 
-    var ctx1 = document.getElementById("chart-line").getContext("2d");
-
-    var gradientStroke1 = ctx1.createLinearGradient(0, 230, 0, 50);
-
-    gradientStroke1.addColorStop(1, 'rgba(251, 99, 64, 0.2)');
-    gradientStroke1.addColorStop(0.2, 'rgba(251, 99, 64, 0.0)');
-    gradientStroke1.addColorStop(0, 'rgba(251, 99, 64, 0)');
-    new Chart(ctx1, {
-        type: "line",
+    var ctx = document.getElementById("chart-daily").getContext("2d");
+    var chart = new Chart(ctx, {
+        type: 'line',
         data: {
-            labels: dates,
+            labels: [],
             datasets: [{
-                label: "Energy (kWh)",
-                tension: 0.2,
-                borderWidth: 0,
-                pointRadius: 2,
+                data: daily,
+                label: "Energy",
                 borderColor: "#63B3ED",
-                backgroundColor: gradientStroke1,
-                borderWidth: 3,
-                fill: true,
-                data: energies,
-                maxBarThickness: 6
-            }],
+                fill: false
+            },
+            {
+                data: predicts,
+                label: "Prediction",
+                borderColor: "rgba(108, 117, 125, 0.7)",
+                fill: false
+            }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: false
-            },
             interaction: {
                 intersect: false,
                 mode: 'index',
             },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    align: 'end',
+                }
+            },
             scales: {
+                x: [{
+                    type: 'time',
+                    time: {
+                        unit: 'day'
+                    },
+                    ticks: {
+                        display: true,
+                        color: 'orange',
+                        font: {
+                            size: 11,
+                            family: "Open Sans",
+                            style: 'normal',
+                            lineHeight: 2
+                        },
+                    }
+                }],
                 y: {
-                    grid: {
-                        drawBorder: false,
+                    title: {
                         display: true,
-                        drawOnChartArea: true,
-                        drawTicks: false,
-                        borderDash: [5, 5],
-                        color: function (ike) {
-                            if (ike.tick.value <= 7920) {
-                                return '#00ff00'
-                            } else if (7920 < ike.tick.value < 12080) {
-                                return '#009900'
-                            } else if (12080 < ike.tick.value < 14580) {
-                                return '#ffff00'
-                            } else if (14580 < ike.tick.value < 19170) {
-                                return '#ff9900'
-                            } else if (19170 < ike.tick.value < 23750) {
-                                return '#ff3300'
-                            }
-                            else {
-                                return '#800000'
-                            }
-
-                        }
-                    },
-                    ticks: {
-                        display: true,
-                        padding: 10,
-                        color: '#aaa',
-                        font: {
-                            size: 11,
-                            family: "Open Sans",
-                            style: 'normal',
-                            lineHeight: 2
-                        },
+                        text: 'Energy (kWh)'
                     }
                 },
-                x: {
-                    grid: {
-                        drawBorder: true,
-                        display: true,
-                        drawOnChartArea: true,
-                        drawTicks: false,
-                        borderDash: [5, 5]
-                    },
-                    ticks: {
-                        display: true,
-                        color: '#aaa',
-                        padding: 20,
-                        font: {
-                            size: 11,
-                            family: "Open Sans",
-                            style: 'normal',
-                            lineHeight: 2
-                        },
-                    }
-                },
-            },
-            animation: {
-            },
+                title: {
+                    display: false,
+                }
+            }
         },
-    });
+    })
 </script>
 @endpush
