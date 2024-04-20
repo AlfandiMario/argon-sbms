@@ -91,12 +91,12 @@ class EnergyController extends Controller
         $predicts->makeHidden(['date', 'prediction']);
 
         // Selisih antara energi hari ini dengen kebiasaan di hari yang sama sebelumnya
-        $dailyEnergy = $this->getDailyEnergy();
+        $dailyEnergy = $this->getLimitedDailyEnergy();
         $todayKwh = $dailyEnergy[0]->today_energy;
         $todayWeekday = Carbon::parse($dailyEnergy[0]->date)->dayOfWeek;
         $todayName = Carbon::parse($dailyEnergy[0]->date)->format('l');
 
-        $previousEnergies = collect($dailyEnergy)->filter(function ($energy) use ($todayWeekday) {
+        $previousEnergies = collect($daily)->filter(function ($energy) use ($todayWeekday) {
             $energyWeekday = Carbon::parse($energy->date)->dayOfWeek;
             return $energyWeekday === $todayWeekday && $energy->date < Carbon::today()->format('Y-m-d');
         });
@@ -114,9 +114,6 @@ class EnergyController extends Controller
 
         // Biaya listrik tiap bulan
         $monthlyKwh = $this->getMonthlyEnergy();
-        foreach ($monthlyKwh as $item) {
-            $item->bulan = Carbon::create(null, $item->month)->monthName;
-        }
         $n = count($monthlyKwh);
         for ($i = 1; $i < $n; $i++) {
             $monthlyKwh[$i]->diffStatus = ($monthlyKwh[$i]->monthly_kwh > $monthlyKwh[$i - 1]->monthly_kwh) ? 'naik' : 'turun';
@@ -484,6 +481,7 @@ class EnergyController extends Controller
             }
             $data[$i]->ike = $ike;
             $data[$i]->color = $color;
+            $data[$i]->bulan = Carbon::create(null, $data[$i]->month)->monthName;
         }
 
         // Remove the last item from the collection since there is no next day for the last day
