@@ -68,15 +68,11 @@
                     <div class="col-lg-12 mb-lg-0 mb-4">
                         <div class="card z-index-2 h-100">
                             <div class="card-header pb-0 pt-3 bg-transparent">
-                                <h6 class="text-capitalize">Power</h6>
-                                <p class="text-sm mb-0">
-                                    <i class="fa fa-arrow-up text-success"></i>
-                                    <span class="font-weight-bold ">4% more</span> than previous month
-                                </p>
+                                <h6 class="text-capitalize">Powers Chart</h6>
                             </div>
                             <div class="card-body p-3">
                                 <div class="chart">
-                                    <canvas id="chart-line" class="chart-canvas" height="300"></canvas>
+                                    <canvas id="chart-power" class="chart-canvas" height="300"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -86,33 +82,11 @@
                     <div class="col-lg-12 mb-lg-0 mb-4">
                         <div class="card z-index-2 h-100">
                             <div class="card-header pb-0 pt-3 bg-transparent">
-                                <h6 class="text-capitalize">Voltage</h6>
-                                <p class="text-sm mb-0">
-                                    <i class="fa fa-arrow-up text-success"></i>
-                                    <span class="font-weight-bold ">4% more</span> than previous month
-                                </p>
+                                <h6 class="text-capitalize">Voltages Chart</h6>
                             </div>
                             <div class="card-body p-3">
                                 <div class="chart">
-                                    <canvas id="chart-line-2" class="chart-canvas" height="300"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row mt-4">
-                    <div class="col-lg-12 mb-lg-0 mb-4">
-                        <div class="card z-index-2 h-100">
-                            <div class="card-header pb-0 pt-3 bg-transparent">
-                                <h6 class="text-capitalize">Current</h6>
-                                <p class="text-sm mb-0">
-                                    <i class="fa fa-arrow-up text-success"></i>
-                                    <span class="font-weight-bold ">4% more</span> than previous month
-                                </p>
-                            </div>
-                            <div class="card-body p-3">
-                                <div class="chart">
-                                    <canvas id="chart-line-3" class="chart-canvas" height="300"></canvas>
+                                    <canvas id="chart-volt" class="chart-canvas" height="300"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -129,274 +103,132 @@
 <script src="{{ asset('assets/js/plugins/chartjs.min.js') }}"></script>
 <script type="text/javascript" src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
 <script>
-    var dataPoints = [];
-    var dataPrediction = [];
-    window.onload = async function () {
-        // Define a function to fetch data from API
-        async function fetchData(url) {
-            return new Promise((resolve, reject) => {
-                $.getJSON(url, function (data) {
-                    resolve(data);
-                });
-            });
-        }
+    var dates = JSON.parse('{!! json_encode($dates) !!}');
+    var volts = JSON.parse('{!! json_encode($volts) !!}');
+    var currents = JSON.parse('{!! json_encode($currents) !!}');
+    var freqs = JSON.parse('{!! json_encode($freqs) !!}');
+    var p = JSON.parse('{!! json_encode($p) !!}');
+    var q = JSON.parse('{!! json_encode($q) !!}');
+    var s = JSON.parse('{!! json_encode($s) !!}');
+    // console.log(predicts);
 
-        // Fetch data from weekly-prediction API
-        predictionData = await fetchData("api/weekly-prediction");
-        for (var i = 0; i < predictionData.length; i++) {
-            dataPrediction.push({ date: new Date(predictionData[i].date), value: Number((predictionData[i].prediction) / 1000) });
-        }
-
-        // Fetch data from daily-energy API
-        dataPoints = await fetchData("api/daily-energy");
-        for (var i = 0; i < energyData.length; i++) {
-            dataPoints.push({ date: new Date(energyData[i].date), value: Number((energyData[i].today_energy) / 1000) });
-        }
-    }
-
-    var ctx1 = document.getElementById("chart-line").getContext("2d");
-
-    var gradientStroke1 = ctx1.createLinearGradient(0, 230, 0, 50);
-
-    gradientStroke1.addColorStop(1, 'rgba(251, 99, 64, 0.2)');
-    gradientStroke1.addColorStop(0.2, 'rgba(251, 99, 64, 0.0)');
-    gradientStroke1.addColorStop(0, 'rgba(251, 99, 64, 0)');
-    new Chart(ctx1, {
-        type: "line",
+    var ctx = document.getElementById("chart-power").getContext("2d");
+    var chart = new Chart(ctx, {
+        type: 'line',
         data: {
-            labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-            datasets: [{
-                label: "Energy (kWh)",
-                tension: 0.2,
-                borderWidth: 0,
-                pointRadius: 2,
-                borderColor: "#596CFF",
-                backgroundColor: gradientStroke1,
-                borderWidth: 3,
-                fill: true,
-                data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
-                maxBarThickness: 6
-            }],
+            labels: dates,
+            datasets: [
+                {
+                    data: p,
+                    label: "Active",
+                    borderColor: "#F56565",
+                    fill: false
+                },
+                {
+                    data: q,
+                    label: "Reactive",
+                    borderColor: "#FBD38D",
+                    fill: false
+                },
+                {
+                    data: s,
+                    label: "Apparent",
+                    borderColor: "#63B3ED",
+                    fill: false
+                },
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false,
-                }
-            },
             interaction: {
                 intersect: false,
                 mode: 'index',
             },
-            scales: {
-                y: {
-                    grid: {
-                        drawBorder: false,
-                        display: true,
-                        drawOnChartArea: true,
-                        drawTicks: false,
-                        borderDash: [5, 5]
-                    },
-                    ticks: {
-                        display: true,
-                        padding: 10,
-                        color: '#aaa',
-                        font: {
-                            size: 11,
-                            family: "Open Sans",
-                            style: 'normal',
-                            lineHeight: 2
-                        },
-                    }
-                },
-                x: {
-                    grid: {
-                        drawBorder: true,
-                        display: true,
-                        drawOnChartArea: true,
-                        drawTicks: false,
-                        borderDash: [5, 5]
-                    },
-                    ticks: {
-                        display: true,
-                        color: '#aaa',
-                        padding: 20,
-                        font: {
-                            size: 11,
-                            family: "Open Sans",
-                            style: 'normal',
-                            lineHeight: 2
-                        },
-                    }
-                },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    align: 'end',
+                }
             },
+            scales: {
+                x: [{
+                    type: 'time',
+                    time: {
+                        unit: 'minute'
+                    },
+                }],
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Power (kW)'
+                    }
+                },
+                title: {
+                    display: false,
+                }
+            }
         },
-    });
+    })
 
-    var ctx2 = document.getElementById("chart-line-2").getContext("2d");
-
-    var gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
-
-    gradientStroke1.addColorStop(1, 'rgba(251, 99, 64, 0.2)');
-    gradientStroke1.addColorStop(0.2, 'rgba(251, 99, 64, 0.0)');
-    gradientStroke1.addColorStop(0, 'rgba(251, 99, 64, 0)');
-    new Chart(ctx2, {
-        type: "line",
+    var ctx2 = document.getElementById("chart-volt").getContext("2d");
+    var chart2 = new Chart(ctx2, {
+        type: 'line',
         data: {
-            labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-            datasets: [{
-                label: "Energy (kWh)",
-                tension: 0.2,
-                borderWidth: 0,
-                pointRadius: 2,
-                borderColor: "#63B3ED",
-                backgroundColor: gradientStroke1,
-                borderWidth: 3,
-                fill: true,
-                data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
-                maxBarThickness: 6
-
-            }],
+            labels: dates,
+            datasets: [
+                {
+                    data: volts,
+                    label: "Voltage (V)",
+                    borderColor: "#F56565",
+                    fill: false
+                },
+                {
+                    data: freqs,
+                    label: "Freq (Hz)",
+                    borderColor: "#FBD38D",
+                    fill: false
+                },
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false,
-                }
-            },
             interaction: {
                 intersect: false,
                 mode: 'index',
             },
-            scales: {
-                y: {
-                    grid: {
-                        drawBorder: false,
-                        display: true,
-                        drawOnChartArea: true,
-                        drawTicks: false,
-                        borderDash: [5, 5]
-                    },
-                    ticks: {
-                        display: true,
-                        padding: 10,
-                        color: '#aaa',
-                        font: {
-                            size: 11,
-                            family: "Open Sans",
-                            style: 'normal',
-                            lineHeight: 2
-                        },
-                    }
-                },
-                x: {
-                    grid: {
-                        drawBorder: true,
-                        display: true,
-                        drawOnChartArea: true,
-                        drawTicks: false,
-                        borderDash: [5, 5]
-                    },
-                    ticks: {
-                        display: true,
-                        color: '#aaa',
-                        padding: 20,
-                        font: {
-                            size: 11,
-                            family: "Open Sans",
-                            style: 'normal',
-                            lineHeight: 2
-                        },
-                    }
-                },
-            },
-        },
-    });
-
-    var ctx3 = document.getElementById("chart-line-3").getContext("2d");
-
-    var gradientStroke1 = ctx3.createLinearGradient(0, 230, 0, 50);
-
-    gradientStroke1.addColorStop(1, 'rgba(251, 99, 64, 0.2)');
-    gradientStroke1.addColorStop(0.2, 'rgba(251, 99, 64, 0.0)');
-    gradientStroke1.addColorStop(0, 'rgba(251, 99, 64, 0)');
-    new Chart(ctx3, {
-        type: "line",
-        data: {
-            labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-            datasets: [{
-                label: "Energy (kWh)",
-                tension: 0.2,
-                borderWidth: 0,
-                pointRadius: 2,
-                borderColor: "#63B3ED",
-                backgroundColor: gradientStroke1,
-                borderWidth: 3,
-                fill: true,
-                data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
-                maxBarThickness: 6
-
-            }],
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    display: false,
+                    display: true,
+                    position: 'top',
+                    align: 'end',
                 }
             },
-            interaction: {
-                intersect: false,
-                mode: 'index',
-            },
             scales: {
+                x: [{
+                    title: {
+                        display: true,
+                        text: 'Timestamps'
+                    },
+                    type: 'time',
+                    time: {
+                        unit: 'minute'
+                    },
+
+                }],
                 y: {
-                    grid: {
-                        drawBorder: false,
+                    title: {
                         display: true,
-                        drawOnChartArea: true,
-                        drawTicks: false,
-                        borderDash: [5, 5]
-                    },
-                    ticks: {
-                        display: true,
-                        padding: 10,
-                        color: '#aaa',
-                        font: {
-                            size: 11,
-                            family: "Open Sans",
-                            style: 'normal',
-                            lineHeight: 2
-                        },
+                        text: 'Power (kW)'
                     }
                 },
-                x: {
-                    grid: {
-                        drawBorder: true,
-                        display: true,
-                        drawOnChartArea: true,
-                        drawTicks: false,
-                        borderDash: [5, 5]
-                    },
-                    ticks: {
-                        display: true,
-                        color: '#aaa',
-                        padding: 20,
-                        font: {
-                            size: 11,
-                            family: "Open Sans",
-                            style: 'normal',
-                            lineHeight: 2
-                        },
-                    }
-                },
-            },
+                title: {
+                    display: false,
+                }
+            }
         },
-    });
+    })
 </script>
 @endpush

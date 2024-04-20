@@ -64,12 +64,13 @@
                                                 number_format((float)$item->bill,'0',',','.'); @endphp</td>
                                             @if($item->diffStatus=='naik')
                                             <td class="text-center text-sm mb-0"><i
-                                                    class="fa-solid fa-sort-up text-danger "></i><span
-                                                    class="mx-2">+ {{$item->diff }} %</span></td>
+                                                    class="fa-solid fa-sort-up text-danger "></i><span class="mx-2">+
+                                                    {{$item->diff }} %</span></td>
                                             @elseif ($item->diffStatus=='turun')
                                             <td class="text-center text-sm my-0 mx-2"><i
                                                     class="fa-solid fa-sort-down text-success "></i>
-                                                <span class="mx-2">- {{$item->diff }} %</span></td>
+                                                <span class="mx-2">- {{$item->diff }} %</span>
+                                            </td>
                                             @else()
                                             <td class="text-center text-sm mb-0"></td>
                                             @endif
@@ -88,8 +89,6 @@
 @endsection
 @push('js')
 <script src="{{ asset('assets/js/plugins/chartjs.min.js') }}"></script>
-
-
 
 <script>
     var predicts = JSON.parse('{!! json_encode($predicts) !!}');

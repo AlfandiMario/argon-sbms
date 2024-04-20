@@ -16,34 +16,46 @@ class EnergyController extends Controller
     public function monitor()
     {
         $title = 'Energy Monitoring';
-        $today = Carbon::today()->toDateString();
-        $yesterday = Carbon::now()->subDay()->toDateString();
-        $thisMonth = Carbon::now()->month; // return int
-        $lastMonth = Carbon::now()->month - 1;
-        $twoMonthAgo = Carbon::now()->month - 2;
 
         $energies = Energy::where('id_kwh', '1')->latest()->first();
-        $lastKwh = EnergyKwh::whereDate('created_at', $today)->orderByDesc('updated_at')->first()->total_energy / 1000;
-        $yesterdayKwh = EnergyKwh::whereDate('created_at', $yesterday)->orderByDesc('updated_at')->first()->total_energy / 1000;
-        $todayEnergy = $lastKwh - $yesterdayKwh;
 
-        $twoMonthAgoKwh = EnergyKwh::whereMonth('created_at', $twoMonthAgo)->orderByDesc('updated_at')->first()->total_energy / 1000;
-        $prevMonthKwh = EnergyKwh::whereMonth('created_at', $lastMonth)->orderByDesc('updated_at')->first()->total_energy / 1000 - $twoMonthAgoKwh;
-        $thisMonthKwh = EnergyKwh::whereMonth('created_at', $thisMonth)->orderByDesc('updated_at')->first()->total_energy / 1000 - $prevMonthKwh;
+        $daily = $this->getLimitedDailyEnergy();
+        $todayEnergy = $daily[0]->total_energy;
 
-        // dd($thisMonthKwh);
+        $monthly = $this->getLimitedMonthlyEnergy();
+        $thisMonthKwh = $monthly[0]->total_energy / 1000;
+        $thisMonthCost = $monthly[0]->bill;
+        $lastMonthCost = $monthly[1]->bill;
 
         $tarif = EnergyCost::latest()->pluck('harga')->first();
-        $lastMonthCost = $prevMonthKwh  * $tarif;
-        $thisMonthCost = $thisMonthKwh  * $tarif;
 
+        $chart = Energy::where('id_kwh', '1')->latest()->limit(40)->get();
+        $dates = [];
+        $freqs = [];
+        $currents = [];
+        $volts = [];
+        $p = [];
+        $q = [];
+        $s = [];
+
+        $n = count($chart);
+        for ($i = $n - 1; $i >= 0; $i--) {
+            $dt = Carbon::parse($chart[$i]->created_at)->format('d M H:i');
+            array_push($dates, $dt);
+            array_push($freqs, $chart[$i]->frekuensi);
+            array_push($currents, $chart[$i]->arus);
+            array_push($volts, $chart[$i]->tegangan);
+            array_push($p, $chart[$i]->active_power);
+            array_push($q, $chart[$i]->reactive_power);
+            array_push($s, $chart[$i]->apparent_power);
+        }
 
         $collection = ["Freq (Hz)", "Ampere (A)", "Voltage (V)", "Power (kWh)", "Reactive P (kVAR)", "Apparent P (kVA)"];
         $keys = ['frekuensi', 'arus', 'tegangan', 'active_power', 'reactive_power', 'apparent_power'];
         $collection2 = ["Today (kWh)", "This Month (kWh)", "Tariff (Rp)", "This Month Cost (Rp)", "Last Month Cost (Rp)"];
         $values2 = [$todayEnergy, $thisMonthKwh, $tarif, $thisMonthCost, $lastMonthCost];
 
-        return view("pages.energy.monitor", compact('title', 'collection', 'keys', 'collection2', 'energies', 'values2'));
+        return view("pages.energy.monitor", compact('title', 'collection', 'keys', 'collection2', 'energies', 'values2', 'dates', 'freqs', 'currents', 'volts', 'p', 'q', 's'));
     }
 
     public function showControl()
@@ -78,7 +90,7 @@ class EnergyController extends Controller
         }
         $predicts->makeHidden(['date', 'prediction']);
 
-        // Selisih antara energi hari ini dengen rata-rata di hari yang sama sebelumnya
+        // Selisih antara energi hari ini dengen kebiasaan di hari yang sama sebelumnya
         $dailyEnergy = $this->getDailyEnergy();
         $todayKwh = $dailyEnergy[0]->today_energy;
         $todayWeekday = Carbon::parse($dailyEnergy[0]->date)->dayOfWeek;
@@ -90,14 +102,12 @@ class EnergyController extends Controller
         });
 
         $sortedEnergies = $previousEnergies->sortBy('today_energy')->values();
-        // return $sortedEnergies;
 
         // Hitung Median karena kalau avg hasilnya tidak mumpuni jika ada data yang inkonsisten (tbtb besar/kecil)
         $count = $sortedEnergies->count();
         $medianEnergy = ($count % 2 == 0)
             ? ($sortedEnergies[$count / 2 - 1]->today_energy + $sortedEnergies[$count / 2]->today_energy) / 2
             : $sortedEnergies[$count / 2]->today_energy;
-        // return $medianEnergy;
 
         $energyDiff = $todayKwh - $medianEnergy;;
         $energyDiffStatus = ($todayKwh > $medianEnergy) ? 'naik' : 'turun';
@@ -114,8 +124,6 @@ class EnergyController extends Controller
         }
         $monthlyKwh[0]->diffStatus = 'awal';
         $monthlyKwh[0]->diff = 0;
-
-        // return $monthlyKwh;
 
         return view("pages.energy.stats", compact('title', 'energyDiff', 'energyDiffStatus', 'todayName', 'predicts', 'daily', 'monthlyKwh'));
     }
@@ -247,6 +255,10 @@ class EnergyController extends Controller
                 "message" => "Data not found"
             ], 404);
         }
+    }
+
+    public function getWeeklyEnergies()
+    {
     }
 
     public function getTotalEnergy()
@@ -396,6 +408,36 @@ class EnergyController extends Controller
         return $data;
     }
 
+    public function getLimitedDailyEnergy()
+    {
+        $data = EnergyKwh::selectRaw('DATE(created_at) as date, MAX(created_at) as latest_updated')
+            ->where('id_kwh', '=', '1')
+            ->groupBy('id_kwh', 'date')
+            ->latest('latest_updated')
+            ->limit(4)->get();
+
+        foreach ($data as $item) {
+            $energy = EnergyKwh::select('total_energy')
+                ->where('id_kwh', 1)
+                ->whereDate('created_at', $item->date)
+                ->latest('created_at')
+                ->first();
+
+            $item->energy_meter = $energy->total_energy;
+        }
+
+        $length = count($data);
+
+        for ($i = 0; $i < $length - 1; $i++) {
+            $data[$i]->today_energy = $data[$i]->energy_meter - $data[$i + 1]->energy_meter;
+        }
+
+        // Remove the last item from the collection since there is no next day for the last day
+        $data->pop();
+
+        return $data;
+    }
+
     public function getMonthlyEnergy()
     {
         // Versi Mario
@@ -446,6 +488,31 @@ class EnergyController extends Controller
 
         // Remove the last item from the collection since there is no next day for the last day
         $data->shift();
+
+        $data->makeHidden(['energy_meter']);
+
+        return $data;
+    }
+
+    public function getLimitedMonthlyEnergy()
+    {
+        $data = EnergyKwh::selectRaw('MONTH(created_at) as month, YEAR(created_at) as tahun, MAX(created_at) as latest_updated, MAX(total_energy) as total_energy')
+            ->where('id_kwh', '=', '1')
+            ->groupBy('month', 'tahun')
+            ->latest('latest_updated')
+            ->limit(3)->get();
+
+        $price = EnergyCost::latest()->first()->pokok;
+
+        $length = count($data);
+
+        for ($i = 0; $i < $length - 1; $i++) {
+            $data[$i]->monthly_kwh = ($data[$i]->total_energy - $data[$i + 1]->total_energy) / 1000; // energy perbulan dalam kWh
+            $data[$i]->bill = intval($data[$i]->monthly_kwh * $price); // biaya listrik perbulan
+        }
+
+        // Remove the last item from the collection since there is no next day for the last day
+        $data->pop();
 
         $data->makeHidden(['energy_meter']);
 
