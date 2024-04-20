@@ -68,7 +68,6 @@ class EnergyController extends Controller
         }
         $daily->makeHidden(['date', 'today_energy', 'timestamp']);
 
-        // return $daily;
 
         $predicts = $this->getWeeklyPrediction();
         $predicts->makeHidden(['id', 'created_at', 'updated_at']);
@@ -79,18 +78,46 @@ class EnergyController extends Controller
         }
         $predicts->makeHidden(['date', 'prediction']);
 
-        // return $predicts;
+        // Selisih antara energi hari ini dengen rata-rata di hari yang sama sebelumnya
+        $dailyEnergy = $this->getDailyEnergy();
+        $todayKwh = $dailyEnergy[0]->today_energy;
+        $todayWeekday = Carbon::parse($dailyEnergy[0]->date)->dayOfWeek;
+        $todayName = Carbon::parse($dailyEnergy[0]->date)->format('l');
 
-        $today = Carbon::today()->toDateString();
-        $yesterday = Carbon::now()->subDay()->toDateString();
-        $lastKwh = EnergyKwh::whereDate('created_at', $today)->orderByDesc('updated_at')->first()->total_energy / 1000;
-        $yesterdayKwh = EnergyKwh::whereDate('created_at', $yesterday)->orderByDesc('updated_at')->first()->total_energy / 1000;
-        $todayKwh = $lastKwh - $yesterdayKwh;
+        $previousEnergies = collect($dailyEnergy)->filter(function ($energy) use ($todayWeekday) {
+            $energyWeekday = Carbon::parse($energy->date)->dayOfWeek;
+            return $energyWeekday === $todayWeekday && $energy->date < Carbon::today()->format('Y-m-d');
+        });
 
-        $energyDiff = number_format((abs($todayKwh - $yesterdayKwh) / $yesterdayKwh) * 100, 2);
-        $energyDiffStatus = ($todayKwh > $yesterdayKwh) ? 'naik' : 'turun';
+        $sortedEnergies = $previousEnergies->sortBy('today_energy')->values();
+        // return $sortedEnergies;
 
-        return view("pages.energy.stats", compact('title', 'predicts', 'daily', 'energyDiff', 'energyDiffStatus'));
+        // Hitung Median karena kalau avg hasilnya tidak mumpuni jika ada data yang inkonsisten (tbtb besar/kecil)
+        $count = $sortedEnergies->count();
+        $medianEnergy = ($count % 2 == 0)
+            ? ($sortedEnergies[$count / 2 - 1]->today_energy + $sortedEnergies[$count / 2]->today_energy) / 2
+            : $sortedEnergies[$count / 2]->today_energy;
+        // return $medianEnergy;
+
+        $energyDiff = $todayKwh - $medianEnergy;;
+        $energyDiffStatus = ($todayKwh > $medianEnergy) ? 'naik' : 'turun';
+
+        // Biaya listrik tiap bulan
+        $monthlyKwh = $this->getMonthlyEnergy();
+        foreach ($monthlyKwh as $item) {
+            $item->bulan = Carbon::create(null, $item->month)->monthName;
+        }
+        $n = count($monthlyKwh);
+        for ($i = 1; $i < $n; $i++) {
+            $monthlyKwh[$i]->diffStatus = ($monthlyKwh[$i]->monthly_kwh > $monthlyKwh[$i - 1]->monthly_kwh) ? 'naik' : 'turun';
+            $monthlyKwh[$i]->diff = number_format(abs(($monthlyKwh[$i]->monthly_kwh - $monthlyKwh[$i - 1]->monthly_kwh) / $monthlyKwh[$i - 1]->monthly_kwh) * 100, 2);
+        }
+        $monthlyKwh[0]->diffStatus = 'awal';
+        $monthlyKwh[0]->diff = 0;
+
+        // return $monthlyKwh;
+
+        return view("pages.energy.stats", compact('title', 'energyDiff', 'energyDiffStatus', 'todayName', 'predicts', 'daily', 'monthlyKwh'));
     }
 
     public function standarIke()

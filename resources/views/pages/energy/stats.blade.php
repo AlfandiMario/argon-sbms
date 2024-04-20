@@ -17,10 +17,14 @@
                                     <p class="text-sm mb-0">
                                         @if($energyDiffStatus == 'naik')
                                         <i class="fa fa-arrow-up text-success"></i>
-                                        <span class="font-weight-bold">{{ $energyDiff }}% more</span> than the previous day
+                                        <span class="font-weight-bold">{{ $energyDiff }}% more</span> than median in the
+                                        previous
+                                        {{ $todayName }}
                                         @else
                                         <i class="fa fa-arrow-down text-danger"></i>
-                                        <span class="font-weight-bold">{{ $energyDiff }}% less</span> than the previous day
+                                        <span class="font-weight-bold">{{ $energyDiff }}% less</span> than median in the
+                                        previous
+                                        {{ $todayName }}
                                         @endif
 
                                     </p>
@@ -40,6 +44,38 @@
                                     <h6 class="text-capitalize">Electricity Bill</h6>
                                 </div>
                                 <div class="card-body p-3">
+                                    <table class="table table-striped table-hover">
+                                        <tr>
+                                            <th class="text-center" width="15%">Bulan</th>
+                                            <th class="text-center" width="20%">Tahun</th>
+                                            <th class="text-center" width="20%">Energi (KWH)</th>
+                                            <th class="text-center" width="10%"></th>
+                                            <th class="text-center" width="20%">Total</th>
+                                            <th class="text-center" width="15%">Than Last Month</th>
+                                        </tr>
+                                        @foreach ($monthlyKwh as $item)
+                                        <tr>
+                                            <td class="text-start">{{$item->bulan}}</td>
+                                            <td class="text-center">{{$item->tahun}}</td>
+                                            <td class="text-center">@php echo
+                                                number_format((float)$item->monthly_kwh,2,',',''); @endphp</td>
+                                            <td class="text-end">Rp </td>
+                                            <td class="text-end">@php echo
+                                                number_format((float)$item->bill,'0',',','.'); @endphp</td>
+                                            @if($item->diffStatus=='naik')
+                                            <td class="text-center text-sm mb-0"><i
+                                                    class="fa-solid fa-sort-up text-danger "></i><span
+                                                    class="mx-2">+ {{$item->diff }} %</span></td>
+                                            @elseif ($item->diffStatus=='turun')
+                                            <td class="text-center text-sm my-0 mx-2"><i
+                                                    class="fa-solid fa-sort-down text-success "></i>
+                                                <span class="mx-2">- {{$item->diff }} %</span></td>
+                                            @else()
+                                            <td class="text-center text-sm mb-0"></td>
+                                            @endif
+                                        </tr>
+                                        @endforeach
+                                    </table>
                                 </div>
                             </div>
                         </div>
