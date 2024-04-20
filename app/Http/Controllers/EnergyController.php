@@ -27,7 +27,7 @@ class EnergyController extends Controller
         $thisMonthCost = $monthly[0]->bill;
         $lastMonthCost = $monthly[1]->bill;
 
-        $tarif = EnergyCost::latest()->pluck('harga')->first();
+        $tarif = EnergyCost::latest()->pluck('pokok')->first();
 
         $chart = Energy::where('id_kwh', '1')->latest()->limit(40)->get();
         $dates = [];

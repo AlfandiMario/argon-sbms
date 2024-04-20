@@ -17,19 +17,21 @@ class DatabaseSeeder extends Seeder
     {
         DB::table('users')->insert([
             'username' => 'admin',
-            'firstname' => 'Admin',
-            'lastname' => 'Admin',
             'email' => 'admin@argon.com',
             'password' => bcrypt('secret'),
             'level' => 'admin'
         ]);
         DB::table('users')->insert([
             'username' => 'mario',
-            'firstname' => 'Mario',
-            'lastname' => 'Alfandi',
             'email' => 'mario@argon.com',
             'password' => bcrypt('secret'),
             'level' => 'user'
+        ]);
+        DB::table('users')->insert([
+            'username' => 'dev',
+            'email' => 'dev@gmail.com',
+            'password' => bcrypt('123456'),
+            'level' => 'admin'
         ]);
         DB::table('energy_costs')->insert([
             'harga' => '1440',
