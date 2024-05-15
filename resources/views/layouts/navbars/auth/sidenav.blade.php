@@ -23,7 +23,7 @@
                 </a>
             </li>
             <li class="nav-item mt-3">
-                <h6 class="ps-2 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Energy Managements</h6>
+                <h6 class="ps-2 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Energy Management</h6>
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ str_contains(request()->url(), 'energy') == true ? 'active' : '' }}"
@@ -36,6 +36,19 @@
                         </div>
                         <span class="nav-link-text ms-1">Energy</span>
                     </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ str_contains(request()->url(), 'standar-ike') == true ? 'active' : '' }}"
+                    href="{{ route('standar-ike') }}">
+                    <div
+                        class="icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fa-solid fa-leaf" style="color: #37c414"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">IKE Standard</span>
+                </a>
+            </li>
+            <li class="nav-item mt-3">
+                <h6 class="ps-2 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Room Management</h6>
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ str_contains(request()->url(), 'security') == true ? 'active' : '' }}"
@@ -56,19 +69,6 @@
                     </div>
                     <span class="nav-link-text ms-1">Environment</span>
                 </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {{ str_contains(request()->url(), 'standar-ike') == true ? 'active' : '' }}"
-                    href="{{ route('standar-ike') }}">
-                    <div
-                        class="icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-                        <i class="fa-solid fa-leaf" style="color: #37c414"></i>
-                    </div>
-                    <span class="nav-link-text ms-1">IKE Standard</span>
-                </a>
-            </li>
-            <li class="nav-item mt-3">
-                <h6 class="ps-2 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Room Managements</h6>
             </li>
             <li class="nav-item mt-3 d-flex align-items-center">
                 <h6 class="ps-2 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Account Info</h6>

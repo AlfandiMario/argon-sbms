@@ -23,6 +23,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\EnergyController;
+use App\Http\Controllers\EnergyPanelController;
 use App\Http\Controllers\LightsController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SecurityController;
@@ -58,6 +59,10 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('/energy-control', [EnergyController::class, 'showControl'])->name('energy-control');
 	Route::get('/energy-stats', [EnergyController::class, 'stats'])->name('energy-stats');
 	Route::get('/standar-ike', [EnergyController::class, 'standarIke'])->name('standar-ike');
+
+	// Device Control
+	Route::get('switch-panel/{id}', [EnvironmentController::class, 'switchPanel'])->name('switch-panel');
+	Route::get('switch-light/{id}', [EnvironmentController::class, 'switchLight'])->name('switch-light');
 
 	Route::get('/security-camera', [SecurityController::class, 'index'])->name('security-camera');
 	Route::get('/security-doorlock', [SecurityController::class, 'doorlock'])->name('security-doorlock');

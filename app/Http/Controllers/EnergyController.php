@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Energy;
+use App\Models\Lights;
 use App\Models\EnergyKwh;
 use App\Models\EnergyCost;
 use App\Models\IkeStandar;
+use App\Models\EnergyPanel;
 use Illuminate\Http\Request;
 use App\Models\EnergyPredict;
 use Illuminate\Support\Carbon;
@@ -20,7 +22,7 @@ class EnergyController extends Controller
         $energies = Energy::where('id_kwh', '1')->latest()->first();
 
         $daily = $this->getLimitedDailyEnergy();
-        $todayEnergy = $daily[0]->total_energy;
+        $todayEnergy = $daily[0]->today_energy / 1000;
 
         $monthly = $this->getLimitedMonthlyEnergy();
         $thisMonthKwh = $monthly[0]->total_energy / 1000;
@@ -61,10 +63,12 @@ class EnergyController extends Controller
     public function showControl()
     {
         $title = 'Energy Control';
-        $devices = ["Main Lamp", "AC", "Second Lamp", "Air Purifier", "Fridge", "CCTV"];
-        $status = [1, 0, 1, 0, 1, 0];
 
-        return view("pages.energy.control", compact('devices', 'status', 'title'));
+        // Dipisah karena berpengaruh ke URL untuk switching
+        $panels = EnergyPanel::oldest()->get();
+        $lights = Lights::oldest()->get();
+
+        return view("pages.energy.control", compact('title', 'panels', 'lights'));
     }
 
     public function stats()
@@ -96,21 +100,16 @@ class EnergyController extends Controller
         $todayWeekday = Carbon::parse($dailyEnergy[0]->date)->dayOfWeek;
         $todayName = Carbon::parse($dailyEnergy[0]->date)->format('l');
 
-        $previousEnergies = collect($daily)->filter(function ($energy) use ($todayWeekday) {
+        $previousEnergies = collect($dailyEnergy)->filter(function ($energy) use ($todayWeekday) {
             $energyWeekday = Carbon::parse($energy->date)->dayOfWeek;
             return $energyWeekday === $todayWeekday && $energy->date < Carbon::today()->format('Y-m-d');
         });
 
-        $sortedEnergies = $previousEnergies->sortBy('today_energy')->values();
+        $averageEnergy = $previousEnergies->avg('today_energy');
+        $comparison = $todayKwh - $averageEnergy;
 
-        // Hitung Median karena kalau avg hasilnya tidak mumpuni jika ada data yang inkonsisten (tbtb besar/kecil)
-        $count = $sortedEnergies->count();
-        $medianEnergy = ($count % 2 == 0)
-            ? ($sortedEnergies[$count / 2 - 1]->today_energy + $sortedEnergies[$count / 2]->today_energy) / 2
-            : $sortedEnergies[$count / 2]->today_energy;
-
-        $energyDiff = $todayKwh - $medianEnergy;;
-        $energyDiffStatus = ($todayKwh > $medianEnergy) ? 'naik' : 'turun';
+        $energyDiff = $todayKwh - $averageEnergy;
+        $energyDiffStatus = ($todayKwh > $averageEnergy) ? 'naik' : 'turun';
 
         // Biaya listrik tiap bulan
         $monthlyKwh = $this->getMonthlyEnergy();

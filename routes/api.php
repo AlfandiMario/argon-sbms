@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\EnergyController;
+use App\Http\Controllers\EnvironmentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -30,6 +31,13 @@ Route::get('ike-dummy', [EnergyController::class, 'getIkeDummy']);
 Route::get('ike-dummy-annual', [EnergyController::class, 'getIkeDummyAnnual']);
 Route::post('receive-forecast', [EnergyController::class, 'receiveForecast']);
 Route::get('weekly-prediction', [EnergyController::class, 'getWeeklyPrediction']);
+
+// Environment Stuff
+Route::get('dht', [EnvironmentController::class, 'getDHT']);
+Route::post('dht', [EnvironmentController::class, 'postDHT']);
+
+// Device Stuff
+Route::get('device-status', [EnvironmentController::class, 'getDeviceStatus']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

@@ -13,13 +13,9 @@
                             <div class="numbers">
                                 <p class="text-sm mb-2 text-uppercase font-weight-bold">Voltage</p>
                                 <h5 class="font-weight-bolder">
-                                    220 V
+                                    {{ $nowVolt }} V
                                 </h5>
-                                <p class="mb-0">
-                                    <span class="text-success text-sm font-weight-bolder">+ 0.4</span>
-                                    <small> than average </small> 
-                                    <!-- Fitur ini bisa jadi tambahan data analitik dengan cara merata-rata data pas aktif (bukan nol) -->
-                                </p>
+                                <small class="text-xs"> Updated: {{ $updatedEnergies }} </small>
                             </div>
                         </div>
                         <div class="col-4 text-end mt-2">
@@ -40,19 +36,15 @@
                             <div class="numbers">
                                 <p class="text-sm mb-2 text-uppercase font-weight-bold">Current</p>
                                 <h5 class="font-weight-bolder">
-                                    2.4 A
+                                    {{ $nowAmp }} A
                                 </h5>
-                                <p class="mb-0">
-                                    <span class="text-success text-sm font-weight-bolder">+ 0.4</span>
-                                    <small> than average </small>
-                                </p>
+                                <small class="text-xs"> Updated: {{ $updatedEnergies }} </small>
                             </div>
                         </div>
                         <div class="col-4 text-end mt-2">
                             <div class="icon icon-shape bg-gradient-warning shadow-danger text-center rounded-circle">
                                 <i class="fa-solid fa-bolt text-lg opacity-10" aria-hidden="true"
                                     style="color: orange"></i>
-
                             </div>
                         </div>
                     </div>
@@ -67,12 +59,9 @@
                             <div class="numbers">
                                 <p class="text-sm mb-2 text-uppercase font-weight-bold">Temperature</p>
                                 <h5 class="font-weight-bolder">
-                                    30 C
+                                    {{ $nowTemp }} C
                                 </h5>
-                                <p class="mb-0">
-                                    <span class="text-success text-sm font-weight-bolder">+ 0.4</span>
-                                    <small> than average </small>
-                                </p>
+                                <small class="text-xs"> Updated: {{ $updatedEnvi }} </small>
                             </div>
                         </div>
                         <div class="col-4 text-end mt-2">
@@ -92,12 +81,9 @@
                             <div class="numbers">
                                 <p class="text-sm mb-2 text-uppercase font-weight-bold">Humidity</p>
                                 <h5 class="font-weight-bolder">
-                                    70%
+                                    {{ $nowHumid }} %
                                 </h5>
-                                <p class="mb-0">
-                                    <span class="text-success text-sm font-weight-bolder">+ 0.4</span>
-                                    <small> than average </small>
-                                </p>
+                                <small class="text-xs"> Updated: {{ $updatedEnvi }} </small>
                             </div>
                         </div>
                         <div class="col-4 text-end mt-2">
@@ -117,8 +103,13 @@
                 <div class="card-header pb-0 pt-3 bg-transparent">
                     <h6 class="text-capitalize">Power Consumption (Monthly)</h6>
                     <p class="text-sm mb-0">
-                        <i class="fa fa-arrow-up text-success"></i>
-                        <span class="font-weight-bold">4% more</span> than previous month
+                        @if($diffStatus == 'naik')
+                        <i class="fa fa-arrow-up text-danger"></i>
+                        <span class="font-weight-bold">{{ $diffMonthly }} more</span> than previous month
+                        @else
+                        <i class="fa fa-arrow-down text-success"></i>
+                        <span class="font-weight-bold">{{ $diffMonthly }} less</span> than previous month
+                        @endif
                     </p>
                 </div>
                 <div class="card-body p-3">
@@ -135,29 +126,19 @@
                     <h6 class="text-capitalize mb-0">Devices Status</h6>
                 </div>
                 <div class="card-body pt-3">
+                    @foreach ($deviceStatus as $item)
                     <div class="d-flex justify-content-between bg-gradient-light my-2 p-2 border-radius-md">
-                        <div class="text-dark fw-bold">Main Lamp</div>
-                        <span class="badge badge-sm bg-gradient-success">Online</span>
+                        <div class="text-dark fw-bold">{{ $item->nama }}</div>
+                        @if($item->status == '1')
+                        <span class="badge badge-sm bg-gradient-success">ON</span>
+                        @else
+                        <span class="badge badge-sm bg-gradient-secondary">OFF</span>
+                        @endif
                     </div>
-                    <div class="d-flex justify-content-between bg-gradient-light my-2 p-2 border-radius-md">
-                        <div class="text-dark fw-bold">AC</div>
-                        <span class="badge badge-sm bg-gradient-success">Online</span>
-                    </div>
-                    <div class="d-flex justify-content-between bg-gradient-light my-2 p-2 border-radius-md">
-                        <div class="text-dark fw-bold">Second Lamp</div>
-                        <span class="badge badge-sm bg-gradient-secondary">Offline</span>
-                    </div>
-                    <div class="d-flex justify-content-between bg-gradient-light my-2 p-2 border-radius-md">
-                        <div class="text-dark fw-bold">Air Purifier</div>
-                        <span class="badge badge-sm bg-gradient-success">Online</span>
-                    </div>
-                    <div class="d-flex justify-content-between bg-gradient-light my-2 p-2 border-radius-md">
-                        <div class="text-dark fw-bold">Fridge</div>
-                        <span class="badge badge-sm bg-gradient-secondary">Offline</span>
-                    </div>
+                    @endforeach
                     <div class="d-flex justify-content-between bg-gradient-light my-2 p-2 border-radius-md">
                         <div class="text-dark fw-bold">CCTV</div>
-                        <span class="badge badge-sm bg-gradient-success">Online</span>
+                        <span class="badge badge-sm bg-gradient-success">ON</span>
                     </div>
                 </div>
             </div>
@@ -169,6 +150,8 @@
 @push('js')
 <script src="./assets/js/plugins/chartjs.min.js"></script>
 <script>
+    var month = JSON.parse('{!! json_encode($month) !!}');
+    var monthlyEnergy = JSON.parse('{!! json_encode($monthlyEnergy) !!}');
     var ctx1 = document.getElementById("chart-line").getContext("2d");
 
     var gradientStroke1 = ctx1.createLinearGradient(0, 230, 0, 50);
@@ -176,20 +159,21 @@
     gradientStroke1.addColorStop(1, 'rgba(251, 99, 64, 0.2)');
     gradientStroke1.addColorStop(0.2, 'rgba(251, 99, 64, 0.0)');
     gradientStroke1.addColorStop(0, 'rgba(251, 99, 64, 0)');
+
     new Chart(ctx1, {
         type: "line",
         data: {
-            labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+            labels: month,
             datasets: [{
                 label: "Energy (kWh)",
-                tension: 0.4,
+                data: monthlyEnergy,
+                tension: 0.1,
                 borderWidth: 0,
                 pointRadius: 0,
                 borderColor: "#fb6340",
                 backgroundColor: gradientStroke1,
                 borderWidth: 3,
                 fill: true,
-                data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
                 maxBarThickness: 6
 
             }],
@@ -208,6 +192,7 @@
             },
             scales: {
                 y: {
+                    position: 'right',
                     grid: {
                         drawBorder: false,
                         display: true,
@@ -215,12 +200,14 @@
                         drawTicks: false,
                         borderDash: [5, 5]
                     },
+                    title: {
+                        display: true,
+                        text: '(kWh)'
+                    },
                     ticks: {
                         display: true,
-                        padding: 10,
-                        color: '#fbfbfb',
                         font: {
-                            size: 11,
+                            size: 10,
                             family: "Open Sans",
                             style: 'normal',
                             lineHeight: 2
@@ -237,7 +224,6 @@
                     },
                     ticks: {
                         display: true,
-                        color: '#ccc',
                         padding: 20,
                         font: {
                             size: 11,

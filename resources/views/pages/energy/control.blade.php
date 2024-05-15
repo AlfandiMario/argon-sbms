@@ -3,7 +3,6 @@
 @section('content')
 @include('layouts.navbars.auth.topnav', ['title' => $title])
 <div class="container-fluid py-4">
-
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -12,38 +11,66 @@
                     <h6>Devices Control</h6>
                 </div>
                 <div class="card-body pt-3">
-                    @php
-                    $i = 0;
-                    foreach ($devices as $device) :
-                    @endphp
-                    <div class="d-flex justify-content-between bg-gradient-light my-2 p-2 border-radius-md">
-                        <div class="text-dark fw-bold">{{ $device }}</div>
-                        {{-- <span class="badge badge-sm bg-gradient-success">Online</span> --}}
-                        @if ($status[$i] == 1)
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" name="mainLamp" type="checkbox" id="mainLamp" checked="">
-                            {{-- <a
-                                href="{{ url('control-change-status-panel-master/'.$energy_panel_masters->id) }}"></a>
-                            --}}
-                            <a href="{{ url('control-change-status-panel-master/') }}"></a>
+                    <div class="col-6 mx-auto">
+                        <!-- Panel (AC, ... , ...) -->
+                        @foreach ($panels as $item)
+                        <div class="d-flex justify-content-between bg-gradient-light my-2 p-2 border-radius-md">
+                            <div class="text-dark fw-bold">{{ $item->nama }}</div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input switch-panel" type="checkbox"
+                                    data-url="{{ url('switch-panel/'.$item->id) }}" {{ $item->status == 1 ? 'checked' :
+                                '' }}>
+                            </div>
                         </div>
-                        @else
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" name="mainLamp" type="checkbox" id="mainLamp">
-                            <a href="{{ url('control-change-status-panel-master') }}"></a>
+                        @endforeach
+
+                        <!-- Lampu -->
+                        @foreach ($lights as $item)
+                        <div class="d-flex justify-content-between bg-gradient-light my-2 p-2 border-radius-md">
+                            <div class="text-dark fw-bold">{{ $item->nama }}</div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input switch-light" type="checkbox"
+                                    data-url="{{ url('switch-light/'.$item->id) }}" {{ $item->status == 1 ? 'checked' :
+                                '' }}>
+                            </div>
                         </div>
-                        @endif
+                        @endforeach
                     </div>
-                    @php
-                    $i++;
-                    endforeach;
-                    @endphp
                 </div>
             </div>
         </div>
     </div>
 </div>
 @endsection
-@push('js')
 
+@push('js')
+<!-- Untuk Perubahan Switch -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Selects all elements with the class switch-panel
+        document.querySelectorAll('.switch-panel').forEach(function (checkbox) { // Iterates over each selected element.
+            checkbox.addEventListener('change', function () {
+                const url = this.getAttribute('data-url');
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        // handle response data if needed
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        });
+
+        document.querySelectorAll('.switch-light').forEach(function (checkbox) {
+            checkbox.addEventListener('change', function () {
+                const url = this.getAttribute('data-url');
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        // handle response data if needed
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        });
+    });
+</script>
 @endpush

@@ -52,7 +52,7 @@
                                     </p>
                                     <h6 class="font-weight-bolder text-warning">
                                         @php echo
-                                        number_format($values2[$i],2,',','.'); @endphp
+                                        number_format($values2[$i],0,',','.'); @endphp
                                     </h6>
                                 </div>
                             </div>
@@ -120,19 +120,19 @@
             datasets: [
                 {
                     data: p,
-                    label: "Active",
+                    label: "Active (kW)",
                     borderColor: "#F56565",
                     fill: false
                 },
                 {
                     data: q,
-                    label: "Reactive",
+                    label: "Reactive (kVAr)",
                     borderColor: "#FBD38D",
                     fill: false
                 },
                 {
                     data: s,
-                    label: "Apparent",
+                    label: "Apparent (kVA)",
                     borderColor: "#63B3ED",
                     fill: false
                 },
@@ -159,12 +159,6 @@
                         unit: 'minute'
                     },
                 }],
-                y: {
-                    title: {
-                        display: true,
-                        text: 'Power (kW)'
-                    }
-                },
                 title: {
                     display: false,
                 }
@@ -218,12 +212,6 @@
                     },
 
                 }],
-                y: {
-                    title: {
-                        display: true,
-                        text: 'Power (kW)'
-                    }
-                },
                 title: {
                     display: false,
                 }
