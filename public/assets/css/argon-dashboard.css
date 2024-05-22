@@ -3989,7 +3989,7 @@ textarea.form-control-lg {
 }
 
 .btn-sm, .btn-group-sm > .btn {
-  padding: 0.5rem 2rem;
+  padding: 0.3rem 1rem;
   font-size: 0.75rem;
   border-radius: 0.5rem;
 }
@@ -9467,7 +9467,8 @@ textarea.form-control-lg {
 }
 
 .bg-primary {
-  background-color: #596CFF !important;
+  /* background-color: #596CFF !important; */
+  background-color: #3dcd58 !important;
 }
 
 .bg-secondary {
@@ -19114,6 +19115,7 @@ textarea.form-control-lg {
 
 .badge.bg-primary {
   background: #596CFF;
+  background: #3dcd58;
 }
 
 .badge.bg-secondary {

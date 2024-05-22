@@ -14,20 +14,27 @@
                             <div class="card z-index-2 h-100">
                                 <div class="card-header pb-0 pt-3 bg-transparent">
                                     <h6 class="text-capitalize">Energy Consumption (Daily)</h6>
-                                    <p class="text-sm mb-0">
-                                        @if($energyDiffStatus == 'naik')
-                                        <i class="fa fa-arrow-up text-success"></i>
-                                        <span class="font-weight-bold">{{ $energyDiff }}% more</span> than median in the
-                                        previous
-                                        {{ $todayName }}
-                                        @else
-                                        <i class="fa fa-arrow-down text-danger"></i>
-                                        <span class="font-weight-bold">{{ $energyDiff }}% less</span> than median in the
-                                        previous
-                                        {{ $todayName }}
-                                        @endif
-
-                                    </p>
+                                    <div class="row">
+                                        <div class="col-sm">
+                                            <p class="text-sm mb-0">
+                                                @if($energyDiffStatus == 'naik')
+                                                <i class="fa fa-arrow-up text-success"></i>
+                                                <span class="font-weight-bold">{{ $energyDiff }}% more</span> than
+                                                average in the previous {{ $todayName }}
+                                                @else
+                                                <i class="fa fa-arrow-down text-danger"></i>
+                                                <span class="font-weight-bold">{{ $energyDiff }}% less</span> than
+                                                average in the previous {{ $todayName }}
+                                                @endif
+                                            </p>
+                                        </div>
+                                        <div class="col-sm d-flex justify-content-end">
+                                            <button id="reModelButton"
+                                                class="btn btn-outline-danger btn-sm mx-2 my-0">Re-Modelling</button>
+                                            <button id="predictButton"
+                                                class="btn btn-outline-dark btn-sm my-0">Predict</button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="card-body p-3">
                                     <div class="chart">
@@ -35,6 +42,7 @@
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                     <div class="row mt-4">
@@ -91,9 +99,8 @@
 <script src="{{ asset('assets/js/plugins/chartjs.min.js') }}"></script>
 
 <script>
-    var predicts = JSON.parse('{!! json_encode($predicts) !!}');
     var daily = JSON.parse('{!! json_encode($daily) !!}');
-    // console.log(predicts);
+    var predicts = JSON.parse('{!! json_encode($predicts) !!}');
 
     var ctx = document.getElementById("chart-daily").getContext("2d");
     var chart = new Chart(ctx, {
@@ -156,6 +163,59 @@
                 }
             }
         },
-    })
+    });
+
+    document.getElementById('reModelButton').addEventListener('click', function () {
+        const reModelButton = this;
+        const predictButton = document.getElementById('predictButton');
+
+        reModelButton.disabled = true;
+        predictButton.disabled = true;
+
+        fetch('https://energyforecastlstm-k5gkihkf7q-et.a.run.app/modelling')
+            .then(response => {
+                if (response.ok) {
+                    reModelButton.disabled = false;
+                    predictButton.disabled = false;
+                } else {
+                    // Handle error case
+                    reModelButton.disabled = false;
+                    predictButton.disabled = false;
+                    console.error('Error with remodeling request.');
+                }
+            })
+            .catch(error => {
+                reModelButton.disabled = false;
+                predictButton.disabled = false;
+                console.error('Fetch error: ', error);
+            });
+    });
+
+    document.getElementById('predictButton').addEventListener('click', function () {
+        const predictButton = this;
+        const reModelButton = document.getElementById('reModelButton');
+
+        predictButton.disabled = true;
+        reModelButton.disabled = true;
+
+        fetch('https://energyforecastlstm-k5gkihkf7q-et.a.run.app/predict')
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    // Handle error case
+                    predictButton.disabled = false;
+                    reModelButton.disabled = false;
+                    console.error('Error with prediction request.');
+                }
+            })
+            .catch(error => {
+                predictButton.disabled = false;
+                reModelButton.disabled = false;
+                console.error('Fetch error: ', error);
+            });
+    });
+
+
 </script>
 @endpush

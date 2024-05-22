@@ -39,6 +39,9 @@ Route::post('dht', [EnvironmentController::class, 'postDHT']);
 // Device Stuff
 Route::get('device-status', [EnvironmentController::class, 'getDeviceStatus']);
 
+// Proxy untuk Komunikasi ke Cloud Run dari Local
+Route::get('/proxy/predict', 'ProxyController@predict');
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
