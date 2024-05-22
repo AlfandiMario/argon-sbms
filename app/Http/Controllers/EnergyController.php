@@ -95,20 +95,21 @@ class EnergyController extends Controller
         $predicts->makeHidden(['date', 'prediction']);
 
         // Selisih antara energi hari ini dengen kebiasaan di hari yang sama sebelumnya
-        $dailyEnergy = $this->getLimitedDailyEnergy();
+        $dailyEnergy = $this->getDailyEnergy();
         $todayKwh = $dailyEnergy[0]->today_energy;
-        $todayWeekday = Carbon::parse($dailyEnergy[0]->date)->dayOfWeek;
-        $todayName = Carbon::parse($dailyEnergy[0]->date)->format('l');
+        $todayWeekday = Carbon::today()->dayOfWeek;
+        $todayName = Carbon::today()->format('l');
 
         $previousEnergies = collect($dailyEnergy)->filter(function ($energy) use ($todayWeekday) {
             $energyWeekday = Carbon::parse($energy->date)->dayOfWeek;
             return $energyWeekday === $todayWeekday && $energy->date < Carbon::today()->format('Y-m-d');
         });
 
+        // Calculate the average energy consumption on previous Saturdays
         $averageEnergy = $previousEnergies->avg('today_energy');
         $comparison = $todayKwh - $averageEnergy;
 
-        $energyDiff = $todayKwh - $averageEnergy;
+        $energyDiff = number_format(($comparison / $averageEnergy * 100), 2);
         $energyDiffStatus = ($todayKwh > $averageEnergy) ? 'naik' : 'turun';
 
         // Biaya listrik tiap bulan
@@ -156,6 +157,10 @@ class EnergyController extends Controller
             array_push($ike, $item->ike);
             array_push($color, $item->color);
         }
+        // Perbandingan dengan Bulan Sebelumnya
+        $n = count($monthlyEnergy);
+        $diffStatus = ($monthlyEnergy[$n - 1] > $monthlyEnergy[$n - 2]) ? 'naik' : 'turun';
+        $diffMonthly = number_format(abs(($monthlyEnergy[$n - 1] - $monthlyEnergy[$n - 2]) / $monthlyEnergy[$n - 2] * 100), 2);
 
         $col = $this->getAnnualEnergy();
         $annualEnergy = [];
@@ -169,7 +174,7 @@ class EnergyController extends Controller
             array_push($color_y, $item->color);
         }
 
-        return view("pages.ike.index", compact('title', 'collection', 'values', 'monthlyEnergy', 'month', 'ike', 'color', 'annualEnergy', 'year', 'ike_y', 'color_y'));
+        return view("pages.ike.index", compact('title', 'collection', 'values', 'monthlyEnergy', 'month', 'ike', 'color', 'annualEnergy', 'year', 'ike_y', 'color_y', 'diffStatus', 'diffMonthly'));
     }
 
     public function getAllEnergies()

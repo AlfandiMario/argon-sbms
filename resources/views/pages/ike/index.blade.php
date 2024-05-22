@@ -41,8 +41,13 @@
                         <div class="card-header pb-0 pt-3 bg-transparent">
                             <h6 class="text-capitalize">Energy Consumption (Monthly)</h6>
                             <p class="text-sm mb-0">
-                                <i class="fa fa-arrow-up text-success"></i>
-                                <span class="font-weight-bold ">4% more</span> than previous month
+                                @if($diffStatus == 'naik')
+                                <i class="fa fa-arrow-up text-danger"></i>
+                                <span class="font-weight-bold">{{ $diffMonthly }}% more</span> than previous month
+                                @else
+                                <i class="fa fa-arrow-down text-success"></i>
+                                <span class="font-weight-bold">{{ $diffMonthly }}% less</span> than previous month
+                                @endif
                             </p>
                         </div>
                         <div class="card-body p-3">
@@ -58,10 +63,10 @@
                     <div class="card z-index-2 h-100">
                         <div class="card-header pb-0 pt-3 bg-transparent">
                             <h6 class="text-capitalize">Energy Consumption (Annualy)</h6>
-                            <p class="text-sm mb-0">
+                            <!-- <p class="text-sm mb-0">
                                 <i class="fa fa-arrow-up text-success"></i>
                                 <span class="font-weight-bold ">4% more</span> than previous month
-                            </p>
+                            </p> -->
                         </div>
                         <div class="card-body p-3">
                             <div class="chart">
