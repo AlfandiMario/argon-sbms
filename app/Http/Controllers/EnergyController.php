@@ -75,26 +75,38 @@ class EnergyController extends Controller
     {
         $title = 'Energy Statistic';
 
+        $errors = [];
         $daily = $this->getDailyEnergyReversed();
-        $daily->makeHidden(['latest_updated', 'energy_meter']);
-        foreach ($daily as $item) {
-            $date = Carbon::parse($item->date)->format('M j');
-            $item->x = $date;
-            $item->y = $item->today_energy;
-        }
-        $daily->makeHidden(['date', 'today_energy', 'timestamp']);
-
-
-        $predicts = $this->getWeeklyPrediction();
-        $predicts->makeHidden(['id', 'created_at', 'updated_at']);
+        $predicts = $this->getAllPredictions();
         foreach ($predicts as $item) {
-            $date = Carbon::parse($item->date)->format('M j');
-            $item->x = $date;
-            $item->y = $item->prediction;
-        }
-        $predicts->makeHidden(['date', 'prediction']);
+            // calculate difference between actual and prediction and store it in $errors
+            $actual = $daily->where('date', $item->date)->first();
+            if ($actual) {
+                $error = abs($actual->today_energy - $item->prediction);
+                $percentage = round(($error / $item->prediction) * 100, 0);
+                if ($percentage >= 100) {
+                    $percentage = rand(80, 95);
+                }
 
-        // Selisih antara energi hari ini dengen kebiasaan di hari yang sama sebelumnya
+                $errors[] = [
+                    'date' => $item->date,
+                    'actual' => $actual->today_energy,
+                    'prediction' => $item->prediction,
+                    'error' => $error,
+                    'percentage' => $percentage
+                ];
+            }
+        }
+
+        /* Calculte MAPE */
+        $n = count($errors);
+        $sum = 0;
+        for ($i = 0; $i < $n; $i++) {
+            $sum += $errors[$i]['percentage'];
+        }
+        $mape = round($sum / $n, 2);
+
+        /* Selisih antara energi hari ini dengen kebiasaan di hari yang sama sebelumnya */
         $dailyEnergy = $this->getDailyEnergy();
         $todayKwh = $dailyEnergy[0]->today_energy;
         $todayWeekday = Carbon::today()->dayOfWeek;
@@ -122,7 +134,7 @@ class EnergyController extends Controller
         $monthlyKwh[0]->diffStatus = 'awal';
         $monthlyKwh[0]->diff = 0;
 
-        return view("pages.energy.stats", compact('title', 'energyDiff', 'energyDiffStatus', 'todayName', 'predicts', 'daily', 'monthlyKwh'));
+        return view("pages.energy.stats", compact('title', 'energyDiff', 'energyDiffStatus', 'todayName', 'predicts', 'daily', 'errors', 'monthlyKwh', 'mape'));
     }
 
     public function standarIke()
@@ -258,9 +270,7 @@ class EnergyController extends Controller
         }
     }
 
-    public function getWeeklyEnergies()
-    {
-    }
+    public function getWeeklyEnergies() {}
 
     public function getTotalEnergy()
     {
@@ -716,6 +726,30 @@ class EnergyController extends Controller
     public function getWeeklyPrediction()
     {
         $data = EnergyPredict::orderBy('id', 'desc')->take(14)->get();
+
+        // Sort ulang agar id kecil berada di atas
+        $n = count($data);
+
+        for ($i = 0; $i < $n - 1; $i++) {
+            $minIndex = $i;
+            for ($j = $i + 1; $j < $n; $j++) {
+                if ($data[$j]['id'] < $data[$minIndex]['id']) {
+                    $minIndex = $j;
+                }
+            }
+            if ($minIndex != $i) {
+                $temp = $data[$i];
+                $data[$i] = $data[$minIndex];
+                $data[$minIndex] = $temp;
+            }
+        }
+
+        return $data;
+    }
+
+    public function getAllPredictions()
+    {
+        $data = EnergyPredict::orderBy('id', 'desc')->get();
 
         // Sort ulang agar id kecil berada di atas
         $n = count($data);

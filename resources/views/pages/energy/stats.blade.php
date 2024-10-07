@@ -35,10 +35,18 @@
                                                 class="btn btn-outline-dark btn-sm my-0">Predict</button>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <p class="text-sm">
+                                            Average Forecast vs Actual Error :
+                                            <span class="text-dark text-bolder">
+                                                {{ $mape }} %
+                                            </span>
+                                        </p>
+                                    </div>
                                 </div>
                                 <div class="card-body p-3">
                                     <div class="chart">
-                                        <canvas id="chart-daily" class="chart-canvas" height="300"></canvas>
+                                        <div id="chart-daily" style="width: 100%; height: 300px;"></div>
                                     </div>
                                 </div>
                             </div>
@@ -96,75 +104,58 @@
 </div>
 @endsection
 @push('js')
-<script src="{{ asset('assets/js/plugins/chartjs.min.js') }}"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
 <script>
-    var daily = JSON.parse('{!! json_encode($daily) !!}');
-    var predicts = JSON.parse('{!! json_encode($predicts) !!}');
+    var chart = echarts.init(document.getElementById('chart-daily'));
 
-    var ctx = document.getElementById("chart-daily").getContext("2d");
-    var chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [{
-                data: daily,
-                label: "Energy",
-                borderColor: "#63B3ED",
-                fill: false
+    var actualData = @json($daily -> map(function ($item) {
+        return ['date' => $item['date'], 'value' => $item['today_energy']];
+    }));
+    var predictData = @json($predicts -> map(function ($item) {
+        return ['date' => $item['date'], 'value' => $item['prediction']];
+    }));
+
+    var allDates = [...new Set([...actualData.map(d => d.date), ...predictData.map(d => d.date)])].sort();
+
+    var options = {
+        tooltip: {
+            trigger: 'axis',
+            formatter: function (params) {
+                var date = params[0].axisValue;
+                var error = @json($errors).find(e => e.date === date);
+                return date + '<br/>' +
+                    params.map(p => p.seriesName + ': ' + p.value[1]).join('<br/>') +
+                    (error ? '<br/>Error: ' + error.error + '<br/>Percentage: ' + error.percentage + '%' : '');
+            }
+        },
+        legend: {
+            data: ['Actual', 'Forecasted']
+        },
+        xAxis: {
+            type: 'category',
+            data: allDates
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+                name: 'Actual',
+                type: 'line',
+                data: actualData.map(d => [d.date, d.value])
             },
             {
-                data: predicts,
-                label: "Prediction",
-                borderColor: "rgba(108, 117, 125, 0.7)",
-                fill: false
+                name: 'Forecasted',
+                type: 'line',
+                data: predictData.map(d => [d.date, d.value])
             }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                intersect: false,
-                mode: 'index',
-            },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    align: 'end',
-                }
-            },
-            scales: {
-                x: [{
-                    type: 'time',
-                    time: {
-                        unit: 'day'
-                    },
-                    ticks: {
-                        display: true,
-                        color: 'orange',
-                        font: {
-                            size: 11,
-                            family: "Open Sans",
-                            style: 'normal',
-                            lineHeight: 2
-                        },
-                    }
-                }],
-                y: {
-                    title: {
-                        display: true,
-                        text: 'Energy (kWh)'
-                    }
-                },
-                title: {
-                    display: false,
-                }
-            }
-        },
-    });
+        ]
+    };
 
+    chart.setOption(options);
+</script>
+
+<script>
     document.getElementById('reModelButton').addEventListener('click', function () {
         const reModelButton = this;
         const predictButton = document.getElementById('predictButton');
@@ -172,7 +163,7 @@
         reModelButton.disabled = true;
         predictButton.disabled = true;
 
-        fetch('https://energyforecastlstm-k5gkihkf7q-et.a.run.app/modelling')
+        fetch('https://iotlabforecast-907500994389.asia-southeast2.run.app/modelling')
             .then(response => {
                 if (response.ok) {
                     reModelButton.disabled = false;
@@ -190,7 +181,6 @@
                 console.error('Fetch error: ', error);
             });
     });
-
     document.getElementById('predictButton').addEventListener('click', function () {
         const predictButton = this;
         const reModelButton = document.getElementById('reModelButton');
@@ -198,7 +188,7 @@
         predictButton.disabled = true;
         reModelButton.disabled = true;
 
-        fetch('https://energyforecastlstm-k5gkihkf7q-et.a.run.app/predict')
+        fetch('https://iotlabforecast-907500994389.asia-southeast2.run.app/predict')
             .then(response => {
                 if (response.ok) {
                     window.location.reload();
@@ -215,7 +205,5 @@
                 console.error('Fetch error: ', error);
             });
     });
-
-
 </script>
 @endpush
