@@ -133,7 +133,12 @@
         },
         xAxis: {
             type: 'category',
-            data: allDates
+            data: allDates,
+            axisLabel: {
+                formatter: function (value) {
+                    return new Date(value).toLocaleDateString('en-US', { day: '2-digit', month: 'short' });
+                }
+            }
         },
         yAxis: {
             type: 'value'
